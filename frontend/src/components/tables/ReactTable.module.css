@@ -1,0 +1,55 @@
+.table {
+    width: 100%;
+    min-width: 1100px;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin: 20px 0 20px 0;
+    font-size: smaller;
+}
+
+.table tr:nth-child(2n+1) {
+    background-color: white;
+  }
+
+.table, th, td {
+    border: 1px solid #BBB;
+    padding: 10px;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+}
+
+.button {
+    min-width: 15px;
+    width: 15px;
+    background: transparent;
+    cursor: pointer;
+    margin: 5px;
+    padding: 0px;
+}
+
+.pagination span {
+    margin: 0px 30px 0px 30px;
+    padding: 0px;
+}
+
+.filter input {
+    width: 100%;
+    padding: 8px 8px;
+    border: none;
+    background-color: white;
+}
+
+.filter select {
+    width: 100%;
+    padding: 8px 8px;
+    border: none;
+    background-color: white;
+}
+
+.sorting {
+    display: flex;
+    align-items: center;
+}

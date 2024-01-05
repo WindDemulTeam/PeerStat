@@ -1,0 +1,30 @@
+html {
+    font-family: Roboto, sans-serif;
+    box-sizing: border-box;
+    font-size: 100%;
+    line-height: 1.3;
+    height: 100%;
+    color: black;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #EEEEEE;
+}
+
+.wrapper {
+    width: 90%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    background-repeat: no-repeat;
+    background-size: 5em;
+    margin-left: 3em;
+    margin-right: 1em;
+    margin-bottom: 1em;
+}

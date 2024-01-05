@@ -1,0 +1,60 @@
+.intro {
+    width:80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.intro p {
+    margin: 10px 0px 10px 0px;
+}
+
+.table {
+    width:80%;
+    border-collapse:collapse;
+    border-spacing:0;
+    margin:0 auto;
+    white-space: normal;
+}
+
+.table td {
+    border-color:black;
+    border-style:solid;
+    border-width:1px;
+    overflow:hidden;
+    padding:10px 5px;
+    word-break:normal;
+}
+
+.table th {
+    border-color:black;
+    border-style:solid;
+    border-width:1px;
+    font-weight:normal;
+    overflow:hidden;
+    padding:10px 5px;
+    word-break:normal;
+}
+
+.table thead span {
+    font-weight:bold
+}
+
+.underlined {
+    border-bottom: 2px solid black;
+}
+
+.made {
+    text-align: right;
+    font-style: italic;
+    padding-top: 20px;
+    border: none!important;
+}
+
+select {
+    padding: 8px 8px;
+    display: block;
+    border: none;
+    box-sizing: border-box;
+    background-color: white;
+    margin: 10px 0 10px 0;
+}

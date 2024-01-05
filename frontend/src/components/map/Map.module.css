@@ -1,0 +1,43 @@
+.map_text {
+    max-width: 1080px;
+    margin-bottom: 100px;
+}
+
+form {}
+.form input[type=text], input[type=password], textarea {
+    min-width: 500px;
+    padding: 16px 8px;
+    margin: 8px 0;
+    display: inline-block;
+    border: none;
+    box-sizing: border-box;
+}
+
+input[type=radio] {
+    margin-left: 20px;
+    height: 1.2em;
+    width: 1.2em;
+}
+button {
+    padding: 14px 0;
+    margin: 10px 0;
+    border: none;
+    min-width: 500px;
+    background-color: #BBBBBB;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+.form_container {
+    text-align: left;
+    margin: 24px 0 12px;
+    vertical-align: top;
+}
+
+.form_block {
+    max-width: 550px;
+    display: inline-block;
+    margin-right: 80px;
+    vertical-align: top;
+}
