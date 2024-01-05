@@ -1,0 +1,80 @@
+version: "3.9"
+
+services:
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend:/usr/share/nginx/html
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      DATABASE_URL: "jdbc:postgresql://postgres:5432/postgres"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+        - "5432:5432"
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  selenium:
+    container_name: selenium
+    image: selenium/standalone-chrome:latest
+    ports:
+        - "4444:4444"
+    networks:
+      - app-network
+
+  frontend:
+    container_name: ReactJS
+    build:
+      context: ../frontend
+      dockerfile: ../frontend/Dockerfile
+    volumes:
+      - ./frontend:/app/build
+    command: sh -c "cd /app && npm run build"
+
+  backend:
+    container_name: java
+    build:
+      context: ../backend
+      dockerfile: ../backend/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOSTNAME: "postgres"
+      SELENIUM_HOSTNAME: "selenium"
+      FULLLOGIN: ""          # FULLLOGIN: format: nickname@student.21-school.ru
+      LOGIN: ""                                   # LOGIN: format: nickname
+      PASSWORD: ""                                # PASSWORD
+      SCHOOL_ID: ""   # SCHOOL_ID
+    depends_on:
+      - postgres
+      - selenium
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    name: app-network
+
+volumes:
+  db-data:
+
