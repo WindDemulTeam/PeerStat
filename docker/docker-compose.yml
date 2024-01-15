@@ -46,6 +46,8 @@ services:
     build:
       context: ../frontend
       dockerfile: ../frontend/Dockerfile
+    environment:
+      REACT_APP_API_ADDR: /api
     volumes:
       - ./frontend:/app/build
     command: sh -c "cd /app && npm run build"

@@ -2,7 +2,7 @@ import axios from "axios";
 
 export default class Api {
   static async getStat(campusId) {
-    const response = await axios.get("/api/stat", {
+    const response = await axios.get(process.env.REACT_APP_API_ADDR + "/stat", {
       params: {
         campus: campusId,
       },
@@ -11,21 +11,28 @@ export default class Api {
   }
 
   static async getCampusList() {
-    const response = await axios.get("/api/campus");
+    const response = await axios.get(
+      process.env.REACT_APP_API_ADDR + "/campus"
+    );
     return response;
   }
 
   static async getProjectList() {
-    const response = await axios.get("/api/projectList");
+    const response = await axios.get(
+      process.env.REACT_APP_API_ADDR + "/projectList"
+    );
     return response;
   }
 
   static async getProjectUsers(projectId) {
-    const response = await axios.get("/api/project", {
-      params: {
-        id: projectId,
-      },
-    });
+    const response = await axios.get(
+      process.env.REACT_APP_API_ADDR + "/project",
+      {
+        params: {
+          id: projectId,
+        },
+      }
+    );
     return response;
   }
 }
