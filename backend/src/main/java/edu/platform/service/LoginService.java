@@ -54,8 +54,10 @@ public class LoginService {
 
     private String cookies;
 
-    public void Init() {
+    public boolean Init() {
+        cookies = null;
         setCookies();
+        return cookies != null;
     }
 
     public void setCookies() {
@@ -97,14 +99,13 @@ public class LoginService {
                         .append(";");
             }
             cookiesStr = cookiesSB.toString();
-
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } finally {
+            System.out.println("[getCookies] done  " + cookiesStr);
+            this.cookies = cookiesStr;
+        } catch ( RuntimeException | InterruptedException e){
+            System.out.println("[getCookies] error");
+        } finally{
             driver.quit();
         }
-        System.out.println("[getCookies] done  " + cookiesStr);
-        cookies = cookiesStr;
     }
 
     public JsonNode sendRequest(String requestBody) throws IOException {

@@ -40,12 +40,12 @@ public class Runner {
         System.out.println("[Runner] run");
 
         try {
-            loginService.Init();
-            parser.parseGraphInfo();
-            parser.initUsers();
+            if (loginService.Init()) {
+                parser.parseGraphInfo();
+                parser.initUsers();
+            }
 
             scheduleDataUpdate();
-            scheduleCookieUpdate();
             scheduleLocationsUpdate();
 
         } catch (IOException e) {
@@ -67,16 +67,6 @@ public class Runner {
                 TimeUnit.DAYS.toMinutes(1), TimeUnit.MINUTES);
     }
 
-    private void scheduleCookieUpdate() {
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
-        long period = TimeUnit.HOURS.toMinutes(6);
-        System.out.println("[Runner] scheduleCookieUpdate period " + period);
-
-        final Runnable scheduleRunner = this::cookieUpdate;
-        scheduler.scheduleAtFixedRate(scheduleRunner, period, period, TimeUnit.MINUTES);
-    }
-
     private void scheduleLocationsUpdate() {
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
@@ -88,17 +78,16 @@ public class Runner {
     }
 
     private void dataUpdate() {
-        System.out.println("[Runner] dataUpdate " + LocalDateTime.now());
-        parser.updateUsers();
-    }
-
-    private void cookieUpdate() {
-        System.out.println("[Runner] cookieUpdate " + LocalDateTime.now());
-        loginService.setCookies();
+        if (loginService.Init()) {
+            System.out.println("[Runner] dataUpdate " + LocalDateTime.now());
+            parser.updateUsers();
+        }
     }
 
     private void locationsUpdate() {
-        System.out.println("[Runner] locationsUpdate " + LocalDateTime.now());
-        parser.updateUserLocations();
+        if (loginService.Init()) {
+            System.out.println("[Runner] locationsUpdate " + LocalDateTime.now());
+            parser.updateUserLocations();
+        }
     }
 }
