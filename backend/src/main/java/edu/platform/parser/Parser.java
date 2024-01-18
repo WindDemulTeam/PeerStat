@@ -63,7 +63,7 @@ public class Parser {
         try {
             List<User> userList = getSearchResults(offset);
             while (!userList.isEmpty()) {
-                userList.stream()
+                userList.parallelStream()
                         .filter(user -> !currentUsersList.contains(user.getLogin()))
                         .forEach(this::parseNewUser);
 
@@ -81,8 +81,7 @@ public class Parser {
     public void updateUsers() {
         System.out.println("[parser updateUsers] updateUsers by login " + loginService.getLogin());
 
-        List<User> usersList = userService.getAll();
-        for (User user : usersList) {
+        userService.getAll().parallelStream().forEach((user) -> {
             try {
                 setCredentials(user);
                 setPersonalInfo(user);
@@ -96,7 +95,7 @@ public class Parser {
             } catch (Exception e) {
                 System.out.println("[parser updateUsers] ERROR " + user.getLogin() + " " + e.getMessage());
             }
-        }
+        });
 
         System.out.println("[parser updateUsers] done " + LocalDateTime.now());
         setLastUpdateTime();
