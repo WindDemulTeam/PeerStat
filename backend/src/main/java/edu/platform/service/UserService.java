@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.platform.mapper.UserMapper;
 import edu.platform.modelView.StatUserView;
 import edu.platform.models.User;
+import edu.platform.models.UserProjectDTO;
 import edu.platform.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,7 +56,7 @@ public class UserService {
     }
 
     public List<StatUserView> findUsersByCampusName(String campusName) {
-        List<User> userList = userRepository.findUserByCampus(campusName);
+        List<UserProjectDTO> userList = userRepository.findUserByCampusWithProjects(campusName);
         return userList.stream()
                 .map(userMapper::getUserStatView)
                 .toList();

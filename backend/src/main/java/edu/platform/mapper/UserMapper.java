@@ -3,14 +3,13 @@ package edu.platform.mapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.platform.constants.ProjectState;
 import edu.platform.modelView.StatUserView;
-import edu.platform.models.Project;
 import edu.platform.models.User;
-import edu.platform.models.UserProject;
+import edu.platform.models.UserProjectDTO;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -32,36 +31,26 @@ public class UserMapper {
     private static final String ALUMNI = "(alumni)";
     private static final String DEACTIVATED = "(deactivated)";
 
-    public static String getRealWave(User user) {
+    public static String getRealWave(String wave) {
         return WAVE_UNKNOWN;
     }
 
-    public static String getLogin(User user) {
-        String login = user.getLogin();
-        if (user.isGraduate()) {
+    public static String getLogin(String  login, boolean isGraduate, boolean isActive) {
+        if (isGraduate) {
             login += " " + ALUMNI;
-        } else if (!user.isActive()) {
+        } else if (!isActive) {
             login += " " + DEACTIVATED;
         }
         return login;
     }
 
-    private String getCurrentProject(User user) {
-        return user.getUserProjectList().stream()
-                .filter(up -> up.getProjectState().equals(ProjectState.IN_PROGRESS)
-                        || up.getProjectState().equals(ProjectState.P2P_EVALUATIONS))
-                .map(UserProject::getProject)
-                .map(Project::getProjectName)
-                .collect(Collectors.joining(" "));
-    }
-
-    private int getXpDiff(User user, int noOfMonths) {
+    private int getXpDiff(int xp, String xph, int noOfMonths) {
         LocalDate minusMonth = LocalDate.now().minusMonths(noOfMonths);
         int diff = 0;
         try {
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode xpHistory = mapper.readTree(user.getXpHistory());
-            int minXpValue = user.getXp();
+            JsonNode xpHistory = mapper.readTree(xph);
+            int minXpValue = xp;
             for (JsonNode row : xpHistory) {
                 LocalDate date = LocalDate.parse(row.get(AWARD_DATE).asText());
                 int xpValue = row.get(XP_VALUE).asInt();
@@ -69,21 +58,21 @@ public class UserMapper {
                     minXpValue = xpValue;
                 }
             }
-            diff = user.getXp() - minXpValue;
+            diff = xp - minXpValue;
         } catch (JsonProcessingException e) {
             System.out.println("[userService] getMonthDiff ERROR " + e.getMessage());
         }
         return diff;
     }
 
-    public StatUserView getUserStatView(User user) {
+    public StatUserView getUserStatView(UserProjectDTO user) {
         StatUserView statUserView = new StatUserView();
 
-        statUserView.setLogin(getLogin(user));
+        statUserView.setLogin(getLogin(user.getLogin(), user.getIsGraduate(), user.getIsActive()));
         statUserView.setEmail(user.getEmail());
         statUserView.setCampus(CAMPUS_LOCALE.get(user.getCampus()));
         statUserView.setCoalition(user.getCoalitionName());
-        statUserView.setWave(getRealWave(user));
+        statUserView.setWave(getRealWave(user.getWaveName()));
         statUserView.setPlatformClass(user.getWaveName());
         statUserView.setBootcamp(user.getBootcampName());
         statUserView.setLevel(user.getLevel());
@@ -91,9 +80,13 @@ public class UserMapper {
         statUserView.setPeerPoints(user.getPeerPoints());
         statUserView.setCodeReviewPoints(user.getCodeReviewPoints());
         statUserView.setCoins(user.getCoins());
-        statUserView.setDiff(getXpDiff(user, 1));
-        statUserView.setDiff3(getXpDiff(user, 3));
-        statUserView.setCurrentProject(getCurrentProject(user));
+        statUserView.setDiff(getXpDiff(user.getXp(), user.getXpHistory(), 1));
+        statUserView.setDiff3(getXpDiff(user.getXp(), user.getXpHistory(), 3));
+        List<String> userProjects = user.getProjects();
+        if (userProjects != null) {
+            statUserView.setCurrentProject(userProjects.stream().map(Object::toString)
+                    .collect(Collectors.joining(", ")));
+        }
 
         return statUserView;
     }

@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ForkJoinPool;
 
 import static edu.platform.constants.GraphQLConstants.*;
 
@@ -32,6 +33,8 @@ public class Parser {
     private ProjectService projectService;
     private UserProjectService userProjectService;
     private LoginService loginService;
+
+    private final ForkJoinPool userUpdatePool = new ForkJoinPool(20);
 
     @Autowired
     public void setUserService(UserService userService) {
@@ -81,20 +84,22 @@ public class Parser {
     public void updateUsers() {
         System.out.println("[parser updateUsers] updateUsers by login " + loginService.getLogin());
 
-        userService.getAll().parallelStream().forEach((user) -> {
-            try {
-                setCredentials(user);
-                setPersonalInfo(user);
-                setXpHistory(user);
-                userService.save(user);
+        userUpdatePool.submit(() -> {
+            userService.getAll().parallelStream().forEach((user) -> {
+                try {
+                    setCredentials(user);
+                    setPersonalInfo(user);
+                    setXpHistory(user);
+                    userService.save(user);
 
-                setUserProjects(user);
-                setUserProjectsFromGraph(user);
+                    setUserProjects(user);
+                    setUserProjectsFromGraph(user);
 
-                System.out.println("[parser updateUsers] user " + user.getLogin() + " ok");
-            } catch (Exception e) {
-                System.out.println("[parser updateUsers] ERROR " + user.getLogin() + " " + e.getMessage());
-            }
+                    System.out.println("[parser updateUsers] user " + user.getLogin() + " ok");
+                } catch (Exception e) {
+                    System.out.println("[parser updateUsers] ERROR " + user.getLogin() + " " + e.getMessage());
+                }
+            });
         });
 
         System.out.println("[parser updateUsers] done " + LocalDateTime.now());

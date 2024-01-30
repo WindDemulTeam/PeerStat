@@ -50,8 +50,7 @@ public class UserProjectService {
     }
 
     public List<ProjectUserView> getProjectUsersList(long projectId) {
-        return userProjectRepository.findByProjectId(projectId).stream()
-                .filter(this::isProjectStateActive)
+        return userProjectRepository.findByProjectIdWithUsers(projectId).stream()
                 .map(userProjectMapper::getProjectUserView)
                 .collect(Collectors.toList());
     }

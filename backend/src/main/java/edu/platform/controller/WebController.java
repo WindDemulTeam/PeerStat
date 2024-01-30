@@ -26,7 +26,7 @@ public class WebController {
     }
 
     @GetMapping("/stat")
-    public List<StatUserView> getStatPage1(@RequestParam(defaultValue = "") String campus) {
+    public List<StatUserView> getStatPage(@RequestParam(defaultValue = "") String campus) {
         if (campus != null && !campus.isEmpty()) {
             return userService.findUsersByCampusName(campus);
         }
@@ -34,7 +34,7 @@ public class WebController {
     }
 
     @GetMapping("/project")
-    public List<ProjectUserView> getProjectsInfo1(@RequestParam(defaultValue = "0") long id) {
+    public List<ProjectUserView> getProjectsInfo(@RequestParam(defaultValue = "0") long id) {
         if (id != 0) {
             return userProjectService.getProjectUsersList(id);
         }

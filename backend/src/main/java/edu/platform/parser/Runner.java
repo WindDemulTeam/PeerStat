@@ -40,12 +40,12 @@ public class Runner {
         System.out.println("[Runner] run");
 
         try {
-            if (loginService.Init()) {
-                parser.parseGraphInfo();
-                parser.initUsers();
-            }
+            loginService.setCookies();
+            parser.parseGraphInfo();
+            parser.initUsers();
 
             scheduleDataUpdate();
+            scheduleCookieUpdate();
             scheduleLocationsUpdate();
 
         } catch (IOException e) {
@@ -67,6 +67,16 @@ public class Runner {
                 TimeUnit.DAYS.toMinutes(1), TimeUnit.MINUTES);
     }
 
+    private void scheduleCookieUpdate() {
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+        long period = TimeUnit.HOURS.toMinutes(3);
+        System.out.println("[Runner] scheduleCookieUpdate period " + period);
+
+        final Runnable scheduleRunner = this::cookieUpdate;
+        scheduler.scheduleAtFixedRate(scheduleRunner, period, period, TimeUnit.MINUTES);
+    }
+
     private void scheduleLocationsUpdate() {
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
@@ -78,16 +88,19 @@ public class Runner {
     }
 
     private void dataUpdate() {
-        if (loginService.Init()) {
-            System.out.println("[Runner] dataUpdate " + LocalDateTime.now());
-            parser.updateUsers();
-        }
+        System.out.println("[Runner] dataUpdate start " + LocalDateTime.now());
+        parser.updateUsers();
+        System.out.println("[Runner] dataUpdate finish " + LocalDateTime.now());
+    }
+
+    private void cookieUpdate() {
+        System.out.println("[Runner] cookieUpdate " + LocalDateTime.now());
+        loginService.setCookies();
     }
 
     private void locationsUpdate() {
-        if (loginService.Init()) {
-            System.out.println("[Runner] locationsUpdate " + LocalDateTime.now());
-            parser.updateUserLocations();
-        }
+        System.out.println("[Runner] locationsUpdate start " + LocalDateTime.now());
+        parser.updateUserLocations();
+        System.out.println("[Runner] locationsUpdate finish " + LocalDateTime.now());
     }
 }
