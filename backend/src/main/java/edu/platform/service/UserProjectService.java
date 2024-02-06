@@ -15,7 +15,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static edu.platform.constants.GraphQLConstants.*;
+import static edu.platform.constants.GraphQLConstants.FINAL_PERCENTAGE;
+import static edu.platform.constants.GraphQLConstants.GOAL_STATUS;
 
 @Service
 public class UserProjectService {
@@ -64,10 +65,10 @@ public class UserProjectService {
         userProjectRepository.save(userProject);
     }
 
-    public void createAndSaveCourse(User user, Project project, JsonNode userProjectJson) {
+    public void createAndSaveCourse(User user, Project project, ProjectState state, int score) {
         UserProject userProject = create(user, project);
-        ProjectState state = ProjectState.valueOf(userProjectJson.get(PROJECT_STATE).asText());
         userProject.setProjectState(state);
+        userProject.setScore(score);
         userProjectRepository.save(userProject);
     }
 

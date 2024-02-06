@@ -186,4 +186,21 @@ public class RequestBody {
                 """, clusterId);
     }
 
+    public static String getLocalCourseGoals(int localCourseId) {
+        return String.format("""
+                {
+                  "operationName": "getLocalCourseGoals",
+                  "variables": {
+                    "localCourseId": "%d"
+                  },
+                  "query": "query getLocalCourseGoals($localCourseId: ID!) {\\n  course {\\n    getLocalCourseGoals(localCourseId: $localCourseId) {\\n      localCourseId\\n      globalCourseId\\n      courseName\\n      courseType\\n      localCourseGoals {\\n        ...LocalCourse\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\\nfragment LocalCourse on LocalCourseGoalInformation {\\n  localCourseGoalId\\n  goalId\\n  goalName\\n  description\\n  projectHours\\n  signUpDate\\n  beginDate\\n  deadlineDate\\n  checkDate\\n  isContentAvailable\\n  executionType\\n  finalPoint\\n  finalPercentage\\n  status\\n  deadlineFree\\n  retriesUsed\\n  retrySettings {\\n    ...RetrySettings\\n    __typename\\n  }\\n  __typename\\n}\\n\\nfragment RetrySettings on ModuleAttemptsSettings {\\n  maxModuleAttempts\\n  isUnlimitedAttempts\\n  __typename\\n}\\n"
+                }
+                """, localCourseId);
+    }
+
+    public static String getProjectInfoByStudent(User user, int goalId) {
+        return String.format("""
+                {"query":"{\\nschool21 {\\n    getModuleById(goalId: \\"%d\\", studentId: \\"%s\\") {\\n\\t\\t\\tfinalPoint\\n\\t\\t\\tdisplayedGoalStatus\\n    }\\n  }\\n}"}
+                """, goalId, user.getStudentId());
+    }
 }

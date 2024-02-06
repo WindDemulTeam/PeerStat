@@ -24,6 +24,18 @@ export default class Api {
     return response;
   }
 
+  static async getCourseList(courseId) {
+    const response = await axios.get(
+      process.env.REACT_APP_API_ADDR + "/courseList",
+      {
+        params: {
+          id: courseId,
+        },
+      }
+    );
+    return response;
+  }
+
   static async getProjectUsers(projectId) {
     const response = await axios.get(
       process.env.REACT_APP_API_ADDR + "/project",

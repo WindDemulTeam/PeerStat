@@ -1,33 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Api from "../../Api/Api";
 import ReactTable from "./ReactTable";
 import { DropdownFilter, TextSearchFilter } from "../../utils/filters";
-import { useFetching } from "../hooks/useFetching";
 import Loader from "../loader/Loader";
+import useFetching from "../hooks/useFetching";
 
 const Stat = () => {
-  const [campusList, setcampusList] = useState({});
-  const [userList, setUserList] = useState([]);
+  const [campusList, setcampusList] = useState({})
+  const [userList, setUserList] = useState([])
+
   const [campusId, setCampusId] = useState(0);
 
-  const [fetchCampusList, isCampusListLoading] = useFetching(async () => {
-    const response = await Api.getCampusList();
-    setcampusList(response.data);
-  });
-
-  const [fetchUsertList, isUsertListLoading] = useFetching(
-    async (campusId) => {
-      const response = await Api.getStat(campusId);
-      setUserList(response.data);
-    }
-  );
-
-  useEffect(() => {
-    fetchCampusList();
+  const { loading: isCampusListLoading } = useFetching(async () => {
+    const response = await Api.getCampusList()
+    setcampusList(response.data)
   }, []);
 
-  useEffect(() => {
-    fetchUsertList(campusId);
+  const { loading: isUsertListLoading } = useFetching(async () => {
+    const response = await Api.getStat(campusId)
+    setUserList(response.data)
   }, [campusId]);
 
   const columns = [
@@ -45,14 +36,6 @@ const Stat = () => {
       Filter: DropdownFilter,
       style: {
         width: "8%",
-      },
-    },
-    {
-      Header: "Волна",
-      accessor: "wave",
-      Filter: DropdownFilter,
-      style: {
-        width: "10%",
       },
     },
     {
@@ -124,7 +107,7 @@ const Stat = () => {
       accessor: "currentProject",
       Filter: TextSearchFilter,
       style: {
-        width: "13%",
+        width: "23%",
       },
     },
   ];

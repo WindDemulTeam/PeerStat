@@ -3,8 +3,6 @@ package edu.platform.mapper;
 import edu.platform.constants.ProjectState;
 import edu.platform.modelView.ProjectUserView;
 import edu.platform.models.ProjectUserDTO;
-import edu.platform.models.User;
-import edu.platform.models.UserProject;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -45,11 +43,10 @@ public class UserProjectMapper {
         view.setEmail(user.getEmail());
         view.setCampus(UserMapper.CAMPUS_LOCALE.get(user.getCampus()));
         view.setCoalition(user.getCoalitionName());
-        view.setWave(UserMapper.getRealWave(user.getWaveName()));
         view.setPlatformClass(user.getWaveName());
         view.setLevel(user.getLevel());
         view.setXp(user.getXp());
-        view.setState(STATE_LOCALE.get(user.getProjectState()));
+        view.setState(STATE_LOCALE.get(ProjectState.valueOf(user.getProjectState())));
         view.setScore(user.getScore());
         view.setLocation((user.getLocation() == null || user.getLocation().isEmpty()) ? "(out of campus)" : user.getLocation());
 

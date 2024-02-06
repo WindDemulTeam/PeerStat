@@ -46,6 +46,13 @@ public class WebController {
         return projectService.getProjectListForWeb();
     }
 
+    @GetMapping("/courseList")
+    public List<ProjectView> getCouresetList(@RequestParam(defaultValue = "0") int id) {
+        if (id != 0) {
+            return projectService.getCourseListForWeb(id);
+        }
+        return null;
+    }
 
     @Autowired
     public void setUserService(UserService userService) {

@@ -10,7 +10,6 @@ public class StatUserView {
     private String email;
     private String campus;
     private String coalition;
-    private String wave;
     private String platformClass;
     private String bootcamp;
     private int level;

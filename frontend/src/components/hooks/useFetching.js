@@ -1,13 +1,24 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react"
 
-export const useFetching = (callback) => {
-  const [loading, setLoading] = useState(false);
+export default function useFetching(callback, dependencies = []) {
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState(false)
 
-  const fetching = async (...args) => {
-    setLoading(true);
-    await callback(...args);
-    setLoading(false);
-  };
+    const callbackMemoized = useCallback(async (...args) => {
+        try {
+            setLoading(true)
+            await callback(...args)
+        } catch (e) {
+            setError(true);
+        } finally {
+            setLoading(false)
+        }
+        // eslint-disable-next-line
+    }, dependencies)
 
-  return [fetching, loading];
-};
+    useEffect(() => {
+        callbackMemoized()
+    }, [callbackMemoized])
+
+    return { loading, error }
+}

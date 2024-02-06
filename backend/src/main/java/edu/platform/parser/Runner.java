@@ -42,10 +42,11 @@ public class Runner {
         try {
             loginService.setCookies();
             parser.parseGraphInfo();
+
+            scheduleCookieUpdate();
             parser.initUsers();
 
             scheduleDataUpdate();
-            scheduleCookieUpdate();
             scheduleLocationsUpdate();
 
         } catch (IOException e) {
@@ -88,9 +89,7 @@ public class Runner {
     }
 
     private void dataUpdate() {
-        System.out.println("[Runner] dataUpdate start " + LocalDateTime.now());
         parser.updateUsers();
-        System.out.println("[Runner] dataUpdate finish " + LocalDateTime.now());
     }
 
     private void cookieUpdate() {

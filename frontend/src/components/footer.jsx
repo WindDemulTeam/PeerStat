@@ -7,6 +7,7 @@ const Footer = () => {
         <a
           href="https://yoomoney.ru/bill/pay/YIyVrgPeffs.240114"
           target="_blank"
+          rel="noopener noreferrer"
         >
           Задонатить
         </a>{" "}

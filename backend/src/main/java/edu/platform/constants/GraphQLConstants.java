@@ -67,12 +67,19 @@ public interface GraphQLConstants {
     String COURSE = "course";
     String COURSE_TYPE = "courseType";
     String COURSE_ID = "localCourseId";
-
+    String COURSE_GOAL = "getLocalCourseGoals";
+    String LOCAL_COURSE_GOAL = "localCourseGoals";
+    String LOCAL_COURSE_NAME = "goalName";
+    String LOCAL_COURSE_DESCRIPTION = "description";
+    String LOCAL_COURSE_DURATION = "projectHours";
+    String LOCAL_COURSE_TYPE = "executionType";
+    String LOCAL_COURSE_SCORE = "finalPoint";
     String PROJECT_NAME = "projectName";
     String PROJECT_DESCRIPTION = "projectDescription";
     String PROJECT_POINTS = "projectPoints";
     String DURATION = "duration";
     String PROJECT_STATE = "projectState";
     String PROJECT_DATE = "projectDate";
-
+    String MODULE_BY_ID = "getModuleById";
+    String MODULE_GOAL_STATUS = "displayedGoalStatus";
 }

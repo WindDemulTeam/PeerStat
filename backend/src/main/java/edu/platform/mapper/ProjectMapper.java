@@ -27,6 +27,7 @@ public class ProjectMapper {
     public ProjectView getProjectView(Project project) {
         ProjectView projectView = new ProjectView();
         projectView.setProjectId(project.getId());
+        projectView.setCourseId(project.getCourseId());
         projectView.setNodeCode(project.getNodeCode());
         projectView.setProjectName(project.getProjectName());
         projectView.setProjectDescription(project.getProjectDescription());

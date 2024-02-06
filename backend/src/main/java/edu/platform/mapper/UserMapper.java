@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.platform.modelView.StatUserView;
-import edu.platform.models.User;
 import edu.platform.models.UserProjectDTO;
 import org.springframework.stereotype.Component;
 
@@ -26,15 +25,8 @@ public class UserMapper {
     );
     private static final String AWARD_DATE = "awardDate";
     private static final String XP_VALUE = "expValue";
-    private static final String WAVE_INTRA = "Intra";
-    private static final String WAVE_UNKNOWN = "???";
     private static final String ALUMNI = "(alumni)";
     private static final String DEACTIVATED = "(deactivated)";
-
-    public static String getRealWave(String wave) {
-        return WAVE_UNKNOWN;
-    }
-
     public static String getLogin(String  login, boolean isGraduate, boolean isActive) {
         if (isGraduate) {
             login += " " + ALUMNI;
@@ -72,7 +64,6 @@ public class UserMapper {
         statUserView.setEmail(user.getEmail());
         statUserView.setCampus(CAMPUS_LOCALE.get(user.getCampus()));
         statUserView.setCoalition(user.getCoalitionName());
-        statUserView.setWave(getRealWave(user.getWaveName()));
         statUserView.setPlatformClass(user.getWaveName());
         statUserView.setBootcamp(user.getBootcampName());
         statUserView.setLevel(user.getLevel());

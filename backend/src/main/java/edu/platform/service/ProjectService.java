@@ -39,24 +39,37 @@ public class ProjectService {
         return projectRepository.findById(id);
     }
 
+    public List<Project> findCourseById(int courseId) {
+        return projectRepository.findByCourseIdAndEntityType(courseId, EntityType.GOAL);
+    }
+
     public ProjectView getProjectInfo(long id) {
         Project project = projectRepository.findById(id).orElse(new Project());
         return projectMapper.getProjectView(project);
     }
 
     public List<ProjectView> getProjectListForWeb() {
-        return projectRepository.findAll().stream()
+        return projectRepository.findByCourseIdAndEntityTypeOrEntityType(0, EntityType.GOAL, EntityType.COURSE).stream()
+                .map(projectMapper::getProjectView)
+                .toList();
+    }
+    public List<ProjectView> getCourseListForWeb(int id) {
+        return projectRepository.findByCourseIdAndEntityType(id, EntityType.GOAL).stream()
                 .map(projectMapper::getProjectView)
                 .toList();
     }
 
-    public void save(Project project) {
-        projectRepository.save(project);
-    }
-
-    public void save(JsonNode projectJson) {
+    public void save(JsonNode projectJson, JsonNode courseJson) {
         try {
-            projectRepository.save(createFromJson(projectJson));
+            projectRepository.save(createProjectFromJson(projectJson));
+            if (courseJson != null) {
+                int courseId = courseJson.get(COURSE).get(COURSE_GOAL).get(COURSE_ID).asInt();
+                JsonNode courses = courseJson.get(COURSE).get(COURSE_GOAL).get(LOCAL_COURSE_GOAL);
+                for (JsonNode course :
+                        courses) {
+                    projectRepository.save(createCourseFromJson(course, courseId));
+                }
+            }
         } catch (JsonProcessingException e) {
             System.out.println("[Project Service] can not create project " + projectJson);
             System.out.println("[Project Service]  " + e.getMessage());
@@ -64,7 +77,7 @@ public class ProjectService {
         }
     }
 
-    public Project createFromJson(JsonNode projectJson) throws JsonProcessingException {
+    public Project createProjectFromJson(JsonNode projectJson) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> projectMap = objectMapper.convertValue(projectJson, new TypeReference<Map<String, Object>>() {
         });
@@ -89,10 +102,31 @@ public class ProjectService {
             project.setProjectType(ProjectType.valueOf(projectInfoMap.get(GOAL_TYPE)));
             project.setIsMandatory(Boolean.valueOf(projectInfoMap.get(IS_MANDATORY)));
         } else if (entityType.equals(EntityType.COURSE)) {
-            project.setProjectType(ProjectType.valueOf(projectInfoMap.get(COURSE_TYPE)));
-            project.setCourseId(Integer.parseInt(projectInfoMap.get(COURSE_ID)));
+            ProjectType projectType = ProjectType.valueOf(projectInfoMap.get(COURSE_TYPE));
+            project.setProjectType(projectType);
+            if (projectType.equals(ProjectType.INTENSIVE)) {
+                project.setCourseId(Integer.parseInt(projectInfoMap.get(COURSE_ID)));
+            }
             project.setIsMandatory(Boolean.valueOf(projectInfoMap.get(IS_MANDATORY)));
         }
+
+        return project;
+    }
+
+    public Project createCourseFromJson(JsonNode courseJson, int courseId) throws JsonProcessingException {
+
+        Project project = new Project();
+
+        project.setId(courseJson.get(GOAL_ID).asLong());
+        project.setCourseId(courseId);
+        project.setEntityType(EntityType.GOAL);
+        project.setProjectName(courseJson.get(LOCAL_COURSE_NAME).asText());
+        project.setProjectDescription(courseJson.get(LOCAL_COURSE_DESCRIPTION).asText());
+        project.setDuration(courseJson.get(LOCAL_COURSE_DURATION).asInt());
+
+        ProjectType projectType = ProjectType.valueOf(courseJson.get(LOCAL_COURSE_TYPE).asText());
+        project.setProjectType(projectType);
+        project.setIsMandatory(true);
 
         return project;
     }
