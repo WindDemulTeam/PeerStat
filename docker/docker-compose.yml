@@ -4,10 +4,18 @@ services:
   nginx:
     container_name: nginx
     image: nginx:latest
+    logging:
+     driver: "json-file"
+     options:
+       max-size: "10M"
+       max-file: "5"
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
       - ./frontend:/usr/share/nginx/html
     depends_on:
       - backend
@@ -15,10 +23,16 @@ services:
     networks:
       - app-network
     restart: unless-stopped
+    command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
 
   postgres:
     container_name: postgres
     image: postgres:latest
+    logging:
+     driver: "json-file"
+     options:
+       max-size: "10M"
+       max-file: "5"
     environment:
       POSTGRES_DB: "postgres"
       POSTGRES_USER: "postgres"
@@ -33,16 +47,13 @@ services:
       - app-network
     restart: unless-stopped
 
-  selenium:
-    container_name: selenium
-    image: selenium/standalone-chrome:latest
-    ports:
-        - "4444:4444"
-    networks:
-      - app-network
-
   frontend:
     container_name: ReactJS
+    logging:
+     driver: "json-file"
+     options:
+       max-size: "10M"
+       max-file: "5"
     build:
       context: ../frontend
       dockerfile: ../frontend/Dockerfile
@@ -54,6 +65,11 @@ services:
 
   backend:
     container_name: java
+    logging:
+     driver: "json-file"
+     options:
+       max-size: "10M"
+       max-file: "5"
     build:
       context: ../backend
       dockerfile: ../backend/Dockerfile
@@ -61,17 +77,24 @@ services:
       - "8080:8080"
     environment:
       DB_HOSTNAME: "postgres"
-      SELENIUM_HOSTNAME: "selenium"
       FULLLOGIN: ""          # FULLLOGIN: format: nickname@student.21-school.ru
       LOGIN: ""                                   # LOGIN: format: nickname
       PASSWORD: ""                                # PASSWORD
-      SCHOOL_ID: ""   # SCHOOL_ID
     depends_on:
       - postgres
-      - selenium
     networks:
       - app-network
     restart: unless-stopped
+    
+  certbot:
+    container_name: certbot
+    image: certbot/certbot
+    networks:
+      - app-network
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 networks:
   app-network:

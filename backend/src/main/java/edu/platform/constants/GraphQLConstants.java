@@ -6,6 +6,7 @@ public interface GraphQLConstants {
     String SCHOOL = "school";
     String SHORT_NAME = "shortName";
     String STUDENT_ID = "studentId";
+    String USER = "user";
     String USER_ID = "userId";
     String SCHOOL_ID = "schoolId";
     String IS_ACTIVE = "isActive";
@@ -82,4 +83,5 @@ public interface GraphQLConstants {
     String PROJECT_DATE = "projectDate";
     String MODULE_BY_ID = "getModuleById";
     String MODULE_GOAL_STATUS = "displayedGoalStatus";
+    String USER_SCHOOL_ROLES = "getCurrentUserSchoolRoles";
 }

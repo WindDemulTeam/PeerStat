@@ -2,44 +2,41 @@ package edu.platform.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.platform.parser.RequestBody;
 import lombok.Getter;
 import lombok.Setter;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.remote.RemoteWebDriver;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import static edu.platform.constants.GraphQLConstants.DATA;
+import static edu.platform.constants.GraphQLConstants.*;
 
 @Getter
 @Setter
 @Service
 public class LoginService {
-    private static final String URL = "https://edu.21-school.ru/";
-    private static final String LOGIN_XPATH = "/html/body/div/div/div/div[2]/div/div/form/div[1]/div/input";
-    private static final String PASSWORD_XPATH = "/html/body/div/div/div/div[2]/div/div/form/div[2]/div/input";
-    private static final String BUTTON_XPATH = "/html/body/div/div/div/div[2]/div/div/form/div[3]/button";
-    private static final String AUTHORITY = "edu.21-school.ru";
     private static final String GRAPHQL_URL = "https://edu.21-school.ru/services/graphql";
+    private final String baseUrl = "https://auth.sberclass.ru/auth/realms/EduPowerKeycloak";
+    private final String cookieUrlTemplate = baseUrl + "/protocol/openid-connect/auth?client_id=school21&redirect_uri=https://edu.21-school.ru/&state=%s&response_mode=fragment&response_type=code&scope=openid&nonce=%s";
+    private final String tokenUrl = baseUrl + "/protocol/openid-connect/token";
     private final ObjectMapper MAPPER = new ObjectMapper();
-
-    @Value("${selenium.url}")
-    private String URL_SELENIUM;
-
     @Value("${school21.fullLogin}")
     private String fullLogin;
 
@@ -49,70 +46,111 @@ public class LoginService {
     @Value("${school21.password}")
     private String password;
 
-    @Value("${school21.school-id}")
     private String schoolId;
+    private String token;
 
-    private String cookies;
+    public boolean login() {
+        String url;
+        Matcher responseMatcher;
+        HttpEntity<String> response;
+        String responseStr;
+        List<String> responseList;
+        HttpHeaders headers;
+        MultiValueMap<String, String> param;
 
-    public boolean Init() {
-        cookies = null;
-        setCookies();
-        return cookies != null;
-    }
+        System.out.println("[Login] start");
 
-    public void setCookies() {
-        System.out.println("[getCookies] start login " + login);
+        final HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
 
-        ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.addArguments("--remote-allow-origins=*");
-        chromeOptions.addArguments("--headless");
-        chromeOptions.addArguments("--no-sandbox");
-        chromeOptions.addArguments("--disable-dev-shm-usage");
+        try (CloseableHttpClient closeableHttpClient = HttpClientBuilder.create().disableRedirectHandling().build()) {
+            factory.setHttpClient(closeableHttpClient);
 
-        URL url;
-        try {
-            url = new URL(URL_SELENIUM);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+            RestTemplate restTemplate = new RestTemplate(factory);
 
-        WebDriver driver = new RemoteWebDriver(url, chromeOptions);
-        driver.manage().window().maximize();
+            UUID state = UUID.randomUUID();
+            UUID nonce = UUID.randomUUID();
 
-        String cookiesStr;
-        try {
-            driver.get(URL);
-            TimeUnit.SECONDS.sleep(1);
-
-            driver.findElement(By.xpath(LOGIN_XPATH)).sendKeys(fullLogin);
-            driver.findElement(By.xpath(PASSWORD_XPATH)).sendKeys(password);
-            driver.findElements(By.xpath(BUTTON_XPATH)).get(0).click();
-            TimeUnit.SECONDS.sleep(1);
-
-            Set<Cookie> cookies = driver.manage().getCookies();
-
-            StringBuilder cookiesSB = new StringBuilder();
-            for (Cookie cookie : cookies) {
-                cookiesSB.append(cookie.getName())
-                        .append("=")
-                        .append(cookie.getValue())
-                        .append(";");
+            response = restTemplate.exchange(String.format(cookieUrlTemplate, state, nonce), HttpMethod.GET, null, String.class);
+            responseStr = response.getBody();
+            if (responseStr == null) {
+                System.out.println("[Login] cookieUrlTemplate error");
+                return false;
             }
-            cookiesStr = cookiesSB.toString();
-            System.out.println("[getCookies] done  " + cookiesStr);
-            this.cookies = cookiesStr;
-        } catch ( RuntimeException | InterruptedException e){
-            System.out.println("[getCookies] error");
-        } finally{
-            driver.quit();
+            responseMatcher = Pattern.compile("(?<loginAction>)https:.+(?=\")", Pattern.MULTILINE).matcher(responseStr);
+            if (responseMatcher.find()) {
+                url = responseStr.substring(responseMatcher.start(), responseMatcher.end()).replace("amp;", "");
+            } else {
+                System.out.println("[Login] loginAction error");
+                return false;
+            }
+
+            headers = new HttpHeaders();
+            headers.setContentType((MediaType.APPLICATION_FORM_URLENCODED));
+            param = new LinkedMultiValueMap<>();
+            param.add("username", fullLogin);
+            param.add("password", password);
+            response = restTemplate.exchange(url,
+                    HttpMethod.POST,
+                    new HttpEntity<>(param, headers),
+                    String.class
+            );
+
+            responseList = response.getHeaders().get(HttpHeaders.LOCATION);
+            if (responseList != null) {
+                response = restTemplate.exchange(responseList.get(0),
+                        HttpMethod.POST,
+                        null,
+                        String.class
+                );
+            } else {
+                System.out.println("[Login] location1 error");
+                return false;
+            }
+
+            responseList = response.getHeaders().get(HttpHeaders.LOCATION);
+            if (responseList == null) {
+                System.out.println("[Login] location2 error");
+                return false;
+            }
+            responseStr = responseList.get(0);
+            responseMatcher = Pattern.compile("(?<=code=).+", Pattern.MULTILINE).matcher(responseStr);
+            String oAuthCode;
+            if (responseMatcher.find()) {
+                oAuthCode = responseStr.substring(responseMatcher.start(), responseMatcher.end());
+            } else {
+                System.out.println("[Login] oAuthCode error");
+                return false;
+            }
+
+            headers = new HttpHeaders();
+            headers.setContentType((MediaType.APPLICATION_FORM_URLENCODED));
+            param = new LinkedMultiValueMap<>();
+            param.add("client_id", "school21");
+            param.add("code", oAuthCode);
+            param.add("grant_type", "authorization_code");
+            param.add("redirect_uri", "https://edu.21-school.ru/");
+
+            response = restTemplate.exchange(tokenUrl,
+                    HttpMethod.POST,
+                    new HttpEntity<>(param, headers),
+                    String.class
+            );
+
+            token = String.valueOf(MAPPER.readTree(response.getBody()).get("access_token")).replaceAll("\"", "");
+            JsonNode jsonNode = sendRequest(RequestBody.userRoleLoaderGetRoles());
+            schoolId = jsonNode.get(USER).get(USER_SCHOOL_ROLES).get(0).get(SCHOOL_ID).asText();
+            System.out.println("[Login] token " + token + "\nschoolId " + schoolId);
+            return true;
+        } catch (HttpServerErrorException | IOException e) {
+            System.out.println("[Login] token error " + e.getMessage());
+            return false;
         }
     }
 
     public JsonNode sendRequest(String requestBody) throws IOException {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Cookie", cookies);
+        headers.setBearerAuth(token);
         headers.set("schoolId", schoolId);
-        headers.set("authority", AUTHORITY);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<String> request = new HttpEntity<>(requestBody, headers);

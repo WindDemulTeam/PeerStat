@@ -203,4 +203,11 @@ public class RequestBody {
                 {"query":"{\\nschool21 {\\n    getModuleById(goalId: \\"%d\\", studentId: \\"%s\\") {\\n\\t\\t\\tfinalPoint\\n\\t\\t\\tdisplayedGoalStatus\\n    }\\n  }\\n}"}
                 """, goalId, user.getStudentId());
     }
+
+    public static String userRoleLoaderGetRoles() {
+        return String.format("""
+                {
+                "query":"\\nquery userRoleLoaderGetRoles {\\n  user {\\n    getCurrentUser {\\n      functionalRoles {\\n        code\\n      }\\n      id\\n      studentRoles {\\n        id\\n        school {\\n          id\\n          shortName\\n          organizationType\\n        }\\n        status\\n      }\\n      userSchoolPermissions {\\n        schoolId\\n        permissions\\n      }\\n      systemAdminRole {\\n        id\\n      }\\n      businessAdminRolesV2 {\\n        id\\n        school {\\n          id\\n          organizationType\\n        }\\n        orgUnitId\\n      }\\n    }\\n    getCurrentUserSchoolRoles {\\n      schoolId\\n    }\\n  }\\n}","operationName":"userRoleLoaderGetRoles"}
+                """);
+    }
 }

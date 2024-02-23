@@ -40,10 +40,10 @@ public class Runner {
         System.out.println("[Runner] run");
 
         try {
-            loginService.setCookies();
+            loginService.login();
             parser.parseGraphInfo();
 
-            scheduleCookieUpdate();
+            scheduleTokenUpdate();
             parser.initUsers();
 
             scheduleDataUpdate();
@@ -68,11 +68,11 @@ public class Runner {
                 TimeUnit.DAYS.toMinutes(1), TimeUnit.MINUTES);
     }
 
-    private void scheduleCookieUpdate() {
+    private void scheduleTokenUpdate() {
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
         long period = TimeUnit.HOURS.toMinutes(3);
-        System.out.println("[Runner] scheduleCookieUpdate period " + period);
+        System.out.println("[Runner] scheduleTokenUpdate period " + period);
 
         final Runnable scheduleRunner = this::cookieUpdate;
         scheduler.scheduleAtFixedRate(scheduleRunner, period, period, TimeUnit.MINUTES);
@@ -93,8 +93,8 @@ public class Runner {
     }
 
     private void cookieUpdate() {
-        System.out.println("[Runner] cookieUpdate " + LocalDateTime.now());
-        loginService.setCookies();
+        System.out.println("[Runner] tokenUpdate " + LocalDateTime.now());
+        loginService.login();
     }
 
     private void locationsUpdate() {
