@@ -85,7 +85,7 @@ services:
     networks:
       - app-network
     restart: unless-stopped
-    
+
   certbot:
     container_name: certbot
     image: certbot/certbot
@@ -95,11 +95,8 @@ services:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    restart: unless-stopped
 
 networks:
   app-network:
     name: app-network
-
-volumes:
-  db-data:
-
