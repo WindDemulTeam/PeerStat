@@ -15,8 +15,7 @@ public class Project {
 
     @Id
     private Long id;
-    private int nodeId;
-    private String nodeCode;
+    private String code;
     private Boolean isMandatory;
     private int courseId;
     private String projectName;

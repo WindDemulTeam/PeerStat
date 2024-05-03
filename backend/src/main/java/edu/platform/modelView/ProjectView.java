@@ -6,7 +6,7 @@ import lombok.Data;
 public class ProjectView {
     private Long projectId;
     private int courseId;
-    private String nodeCode;
+    private String code;
     private String projectName;
     private String projectDescription;
     private int points;

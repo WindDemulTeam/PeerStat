@@ -57,7 +57,11 @@ public interface GraphQLConstants {
     String BASIC_GRAPH = "getBasisGraph";
     String GRAPH_NODES = "graphNodes";
     String GRAPH_NODE_ID = "graphNodeId";
-    String NODE_CODE = "nodeCode";
+    String NODES = "nodes";
+    String STUDENT_STATE_GRAPH = "getStudentStateGraph";
+    String HOLY_GRAPH = "holyGraph";
+    String ITEMS = "items";
+    String CODE = "code";
     String ENTITY_ID = "entityId";
     String ENTITY_TYPE = "entityType";
 

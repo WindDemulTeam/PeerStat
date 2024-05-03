@@ -84,8 +84,7 @@ public class ProjectService {
 
         Project project = new Project();
         project.setId(Long.parseLong(projectMap.get(ENTITY_ID).toString()));
-        project.setNodeId(Integer.parseInt(projectMap.get(GRAPH_NODE_ID).toString()));
-        project.setNodeCode(projectMap.get(NODE_CODE).toString());
+        project.setCode(projectMap.get(CODE).toString());
 
         EntityType entityType = EntityType.valueOf(projectMap.get(ENTITY_TYPE).toString());
         project.setEntityType(entityType);
