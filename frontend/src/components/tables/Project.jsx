@@ -119,7 +119,7 @@ const Project = () => {
           </option>
           {projectsList.map((project, index) => (
             <option key={project.projectId} value={index}>
-              {project.nodeCode + "_" + project.projectName}
+              {project.projectName}
             </option>
           ))}
         </select>
