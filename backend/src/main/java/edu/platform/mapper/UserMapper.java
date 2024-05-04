@@ -23,7 +23,8 @@ public class UserMapper {
             "21 Test", "Тестирование",
             "21 Test QA", "Тестирование QA",
             "21 Yakutsk", "Якутск",
-            "21 Veliky Novgorod", "Великий Новгород"
+            "21 Veliky Novgorod", "Великий Новгород",
+            "21 Samarkand", "Самарканд"
     );
     private static final String AWARD_DATE = "awardDate";
     private static final String XP_VALUE = "expValue";
