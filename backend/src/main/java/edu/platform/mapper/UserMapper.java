@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.platform.modelView.StatUserView;
 import edu.platform.models.UserProjectDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -23,7 +24,7 @@ public class UserMapper {
     private static final String DEACTIVATED = "(deactivated)";
 
     public UserMapper() {
-        Map<String, String> CAMPUS_LOCALE = new HashMap<>();
+        CAMPUS_LOCALE = new HashMap<>();
 
         CAMPUS_LOCALE.put("21 Moscow", "Москва");
         CAMPUS_LOCALE.put("21 Kazan", "Казань");
