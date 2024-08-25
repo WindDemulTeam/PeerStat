@@ -9,18 +9,18 @@ public class RequestBody {
     public static String getSearchResults(int limit, int offset) {
         return String.format("""
                 {
-                  "operationName": "getGlobalSearchResults",
-                  "variables": {
-                    "searchString": "student",
-                    "items": [
-                      "PROFILES"
-                    ],
-                    "page": {
-                      "limit": %d,
-                      "offset": %d
-                    }
-                  },
-                  "query": "query getGlobalSearchResults($searchString: String!, $items: [SearchItem]!, $page: PagingInput!) {\\n  globalSearch {\\n    searchByText(searchString: $searchString, items: $items, page: $page) {\\n      profiles {\\n        ...GlobalSearchProfilesSearchResult\\n        __typename\\n      }\\n      projects {\\n        ...GlobalSearchProjectsSearchResult\\n        __typename\\n      }\\n      studentCourses {\\n        ...GlobalSearchCoursesSearchResult\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\\nfragment GlobalSearchProfilesSearchResult on ProfilesSearchResult {\\n  count\\n  profiles {\\n    login\\n    firstName\\n    lastName\\n    level\\n    avatarUrl\\n    school {\\n      shortName\\n      __typename\\n    }\\n    __typename\\n  }\\n  __typename\\n}\\n\\nfragment GlobalSearchProjectsSearchResult on ProjectsSearchResult {\\n  count\\n  projects {\\n    studentTaskId\\n    status\\n    finalPercentage\\n    finalPoint\\n    project {\\n      goalId\\n      goalName\\n      __typename\\n    }\\n    executionType\\n    __typename\\n  }\\n  __typename\\n}\\n\\nfragment GlobalSearchCoursesSearchResult on CoursesSearchResult {\\n  count\\n  courses {\\n    goalId\\n    name\\n    displayedCourseStatus\\n    executionType\\n    finalPercentage\\n    experience\\n    courseType\\n    localCourseId\\n    goalStatus\\n    __typename\\n  }\\n  __typename\\n}\\n"
+                    "operationName": "getGlobalSearchResults",
+                    "variables": {
+                        "searchString": "student",
+                        "items": [
+                            "PROFILES"
+                        ],
+                        "page": {
+                            "limit": %d,
+                            "offset": %d
+                        }
+                    },
+                    "query": "query getGlobalSearchResults($searchString: String!, $items: [SearchItem]!, $page: PagingInput!) {\\n  globalSearch {\\n    searchByText(searchString: $searchString, items: $items, page: $page) {\\n      profiles {\\n        ...GlobalSearchProfilesSearchResult\\n        __typename\\n      }\\n      projects {\\n        ...GlobalSearchProjectsSearchResult\\n        __typename\\n      }\\n      studentCourses {\\n        ...GlobalSearchCoursesSearchResult\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\\nfragment GlobalSearchProfilesSearchResult on ProfilesSearchResult {\\n  count\\n  profiles {\\n    login\\n    firstName\\n    lastName\\n    level\\n    avatarUrl\\n    school {\\n      shortName\\n      __typename\\n    }\\n    __typename\\n  }\\n  __typename\\n}\\n\\nfragment GlobalSearchProjectsSearchResult on ProjectsSearchResult {\\n  count\\n  projects {\\n    studentTaskId\\n    status\\n    finalPercentage\\n    finalPoint\\n    project {\\n      goalId\\n      goalName\\n      __typename\\n    }\\n    executionType\\n    __typename\\n  }\\n  __typename\\n}\\n\\nfragment GlobalSearchCoursesSearchResult on CoursesSearchResult {\\n  count\\n  courses {\\n    goalId\\n    name\\n    displayedCourseStatus\\n    executionType\\n    finalPercentage\\n    experience\\n    courseType\\n    localCourseId\\n    goalStatus\\n    __typename\\n  }\\n  __typename\\n}\\n"
                 }""", limit, offset);
     }
 

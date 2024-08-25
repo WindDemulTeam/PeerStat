@@ -151,6 +151,7 @@ public class LoginService {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.set("schoolId", schoolId);
+        headers.set("userrole", "STUDENT");
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<String> request = new HttpEntity<>(requestBody, headers);

@@ -8,6 +8,7 @@ import edu.platform.models.UserProjectDTO;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,23 +16,30 @@ import java.util.stream.Collectors;
 @Component
 public class UserMapper {
 
-    public static final Map<String, String> CAMPUS_LOCALE = Map.of(
-            "21 Moscow", "Москва",
-            "21 Kazan", "Казань",
-            "21 Novosibirsk", "Новосибирск",
-            "21 Surgut", "Сургут",
-            "21 Test", "Тестирование",
-            "21 Test QA", "Тестирование QA",
-            "21 Yakutsk", "Якутск",
-            "21 Veliky Novgorod", "Великий Новгород",
-            "21 Samarkand", "Самарканд",
-            "21 Yaroslavl", "Ярославль"
-    );
+    public static Map<String, String> CAMPUS_LOCALE;
     private static final String AWARD_DATE = "awardDate";
     private static final String XP_VALUE = "expValue";
     private static final String ALUMNI = "(alumni)";
     private static final String DEACTIVATED = "(deactivated)";
-    public static String getLogin(String  login, boolean isGraduate, boolean isActive) {
+
+    public UserMapper() {
+        Map<String, String> CAMPUS_LOCALE = new HashMap<>();
+
+        CAMPUS_LOCALE.put("21 Moscow", "Москва");
+        CAMPUS_LOCALE.put("21 Kazan", "Казань");
+        CAMPUS_LOCALE.put("21 Novosibirsk", "Новосибирск");
+        CAMPUS_LOCALE.put("21 Surgut", "Сургут");
+        CAMPUS_LOCALE.put("21 Test", "Тестирование");
+        CAMPUS_LOCALE.put("21 Test QA", "Тестирование QA");
+        CAMPUS_LOCALE.put("21 Yakutsk", "Якутск");
+        CAMPUS_LOCALE.put("21 Veliky Novgorod", "Великий Новгород");
+        CAMPUS_LOCALE.put("21 Samarkand", "Самарканд");
+        CAMPUS_LOCALE.put("21 Yaroslavl", "Ярославль");
+        CAMPUS_LOCALE.put("21 Magas", "Магас");
+        CAMPUS_LOCALE.put("Акселератор студента 0 этап", "Акселератор студента 0 этап");
+    }
+
+    public static String getLogin(String login, boolean isGraduate, boolean isActive) {
         if (isGraduate) {
             login += " " + ALUMNI;
         } else if (!isActive) {

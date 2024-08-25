@@ -62,7 +62,7 @@ public class ProjectService {
     public void save(JsonNode projectJson, JsonNode courseJson) {
         try {
             projectRepository.save(createProjectFromJson(projectJson));
-            if (courseJson != null) {
+            if (courseJson != null && !courseJson.isNull()) {
                 int courseId = courseJson.get(COURSE).get(COURSE_GOAL).get(COURSE_ID).asInt();
                 JsonNode courses = courseJson.get(COURSE).get(COURSE_GOAL).get(LOCAL_COURSE_GOAL);
                 for (JsonNode course :

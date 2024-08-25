@@ -26,7 +26,7 @@ import static edu.platform.constants.GraphQLConstants.*;
 
 @Component
 public class Parser {
-    private static final int SEARCH_LIMIT = 25;
+    private static final int SEARCH_LIMIT = 6;
     private static final String LAST_UPDATE_PROPERTIES_FILE = "last-update.properties";
     private static final String LAST_UPDATE_TIME = "task-update.time";
 
@@ -299,15 +299,18 @@ public class Parser {
         List<User> userList = new ArrayList<>();
         JsonNode searchInfo = sendRequest(RequestBody.getSearchResults(SEARCH_LIMIT, offset));
         if (!searchInfo.isEmpty()) {
-            JsonNode profiles = searchInfo.get(GLOBAL_SEARCH).get(SEARCH_BY_TEXT).get(PROFILES).get(PROFILES);
-            for (JsonNode profile : profiles) {
-                String fullLogin = profile.get(LOGIN).asText();
-                String login = fullLogin.contains("@") ? fullLogin.substring(0, fullLogin.indexOf("@")) : fullLogin;
-                String campus = profile.get(SCHOOL).get(SHORT_NAME).asText();
-                User user = new User(login);
-                user.setCampus(campus);
-                user.setSchoolId(loginService.getSchoolId());
-                userList.add(user);
+            JsonNode globalSearch = searchInfo.get(GLOBAL_SEARCH);
+            if (globalSearch != null && !globalSearch.isNull()) {
+                JsonNode profiles = globalSearch.get(SEARCH_BY_TEXT).get(PROFILES).get(PROFILES);
+                for (JsonNode profile : profiles) {
+                    String fullLogin = profile.get(LOGIN).asText();
+                    String login = fullLogin.contains("@") ? fullLogin.substring(0, fullLogin.indexOf("@")) : fullLogin;
+                    String campus = profile.get(SCHOOL).get(SHORT_NAME).asText();
+                    User user = new User(login);
+                    user.setCampus(campus);
+                    user.setSchoolId(loginService.getSchoolId());
+                    userList.add(user);
+                }
             }
         }
         return userList;
