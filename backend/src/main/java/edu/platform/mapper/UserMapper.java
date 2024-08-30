@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.platform.modelView.StatUserView;
 import edu.platform.models.UserProjectDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -17,11 +16,11 @@ import java.util.stream.Collectors;
 @Component
 public class UserMapper {
 
-    public static Map<String, String> CAMPUS_LOCALE;
     private static final String AWARD_DATE = "awardDate";
     private static final String XP_VALUE = "expValue";
     private static final String ALUMNI = "(alumni)";
     private static final String DEACTIVATED = "(deactivated)";
+    public static Map<String, String> CAMPUS_LOCALE;
 
     public UserMapper() {
         CAMPUS_LOCALE = new HashMap<>();
