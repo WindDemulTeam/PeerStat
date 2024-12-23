@@ -87,7 +87,7 @@ public class LoginService {
             headers = new HttpHeaders();
             headers.setContentType((MediaType.APPLICATION_FORM_URLENCODED));
             param = new LinkedMultiValueMap<>();
-            param.add("username", fullLogin);
+            param.add("username", login);
             param.add("password", password);
             response = restTemplate.exchange(url,
                     HttpMethod.POST,

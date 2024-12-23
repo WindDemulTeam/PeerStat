@@ -39,11 +39,11 @@ public class RequestBody {
     public static String getCredentialInfo(User user) {
         return String.format("""
                 {
-                  "operationName": "getCredentialsByLogin",
-                  "variables": {
-                    "login": "%s@student.21-school.ru"
-                  },
-                  "query": "query getCredentialsByLogin($login: String!) {\\n  school21 {\\n    getStudentByLogin(login: $login) {\\n      studentId\\n      userId\\n      schoolId\\n      isActive\\n      isGraduate\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n"
+                      "operationName": "getCredentialsByLogin",
+                      "variables": {
+                          "login": "%s"
+                      },
+                      "query": "query getCredentialsByLogin($login: String!) {\\n  school21 {\\n    getStudentByLogin(login: $login) {\\n      studentId\\n      userId\\n      schoolId\\n      isActive\\n      isGraduate\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n"
                 }
                 """, user.getLogin());
     }
@@ -52,11 +52,11 @@ public class RequestBody {
         return String.format("""
                 {
                     "operationName": "publicProfileGetPersonalInfo",
-                        "variables": {
+                    "variables": {
                         "userId": "%s",
                         "studentId": "%s",
                         "schoolId": "%s",
-                        "login": "%s@student.21-school.ru"
+                        "login": "%s"
                     },
                     "query": "query publicProfileGetPersonalInfo($userId: UUID!, $studentId: UUID!, $login: String!, $schoolId: UUID!) {\\n  school21 {\\n    getAvatarByUserId(userId: $userId)\\n    getStageGroupS21PublicProfile(studentId: $studentId) {\\n      waveId\\n      waveName\\n      eduForm\\n      __typename\\n    }\\n    getExperiencePublicProfile(userId: $userId) {\\n      value\\n      level {\\n        levelCode\\n        range {\\n          leftBorder\\n          rightBorder\\n          __typename\\n        }\\n        __typename\\n      }\\n      cookiesCount\\n      coinsCount\\n      codeReviewPoints\\n      isReviewPointsConsistent\\n      __typename\\n    }\\n    getEmailbyUserId(userId: $userId)\\n    getClassRoomByLogin(login: $login) {\\n      id\\n      number\\n      floor\\n      __typename\\n    }\\n    __typename\\n  }\\n  student {\\n    getWorkstationByLogin(login: $login) {\\n      workstationId\\n      hostName\\n      row\\n      number\\n      __typename\\n    }\\n    getFeedbackStatisticsAverageScore(studentId: $studentId) {\\n      countFeedback\\n      feedbackAverageScore {\\n        categoryCode\\n        categoryName\\n        value\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n  user {\\n    getSchool(schoolId: $schoolId) {\\n      id\\n      fullName\\n      shortName\\n      address\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n"
                 }
@@ -130,12 +130,12 @@ public class RequestBody {
     public static String getUserProjects(User user) {
         return String.format("""
                 {
-                  "operationName": "publicProfileGetProjects",
-                  "variables": {
-                    "studentId": "%s",
-                    "stageGroupId": "%s"
-                  },
-                  "query": "query publicProfileGetProjects($studentId: UUID!, $stageGroupId: ID!) {\\n  school21 {\\n    getStudentProjectsForPublicProfileByStageGroup(\\n      studentId: $studentId\\n      stageGroupId: $stageGroupId\\n    ) {\\n      groupName\\n      name\\n      experience\\n      finalPercentage\\n      goalId\\n      goalStatus\\n      amountAnswers\\n      amountReviewedAnswers\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n"
+                    "operationName": "publicProfileGetProjects",
+                    "variables": {
+                        "studentId": "%s",
+                        "stageGroupId": "%s"
+                    },
+                    "query": "query publicProfileGetProjects($studentId: UUID!, $stageGroupId: ID!) {\\n  school21 {\\n    getStudentProjectsForPublicProfileByStageGroup(\\n      studentId: $studentId\\n      stageGroupId: $stageGroupId\\n    ) {\\n      groupName\\n      name\\n      experience\\n      finalPercentage\\n      goalId\\n      goalStatus\\n      amountAnswers\\n      amountReviewedAnswers\\n      executionType\\n      localCourseId\\n      courseType\\n      displayedCourseStatus\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n"
                 }
                 """, user.getStudentId(), user.getWaveId());
     }
@@ -193,7 +193,7 @@ public class RequestBody {
                     "variables": {
                         "localCourseId": "%d"
                     },
-                    "query": "query getLocalCourseGoals($localCourseId: ID!) {\\n  course {\\n    getLocalCourseGoals(localCourseId: $localCourseId) {\\n      localCourseId\\n      globalCourseId\\n      courseName\\n      courseType\\n      localCourseGoals {\\n        ...LocalCourse\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\\nfragment LocalCourse on LocalCourseGoalInformation {\\n  localCourseGoalId\\n  goalId\\n  goalName\\n  description\\n  projectHours\\n  signUpDate\\n  beginDate\\n  deadlineDate\\n  checkDate\\n  isContentAvailable\\n  executionType\\n  finalPoint\\n  finalPercentage\\n  status\\n  periodSettings\\n  retriesUsed\\n  retrySettings {\\n    ...RetrySettings\\n    __typename\\n  }\\n  __typename\\n}\\n\\nfragment RetrySettings on ModuleAttemptsSettings {\\n  maxModuleAttempts\\n  isUnlimitedAttempts\\n  __typename\\n}\\n"
+                    "query": "query getLocalCourseGoals($localCourseId: ID!) {\\n  course {\\n    getLocalCourseGoals(localCourseId: $localCourseId) {\\n      localCourseId\\n      globalCourseId\\n      courseName\\n      courseType\\n      localCourseGoals {\\n        ...LocalCourse\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\\nfragment LocalCourse on LocalCourseGoalInformation {\\n  localCourseGoalId\\n  goalId\\n  goalName\\n  description\\n  projectHours\\n  signUpDate\\n  beginDate\\n  deadlineDate\\n  checkDate\\n  isContentAvailable\\n  executionType\\n  finalPoint\\n  finalPercentage\\n  status\\n  periodSettings\\n  retriesUsed\\n  statusUpdateDate\\n  retrySettings {\\n    ...RetrySettings\\n    __typename\\n  }\\n  __typename\\n}\\n\\nfragment RetrySettings on ModuleAttemptsSettings {\\n  maxModuleAttempts\\n  isUnlimitedAttempts\\n  __typename\\n}\\n"
                 }
                 """, localCourseId);
     }
