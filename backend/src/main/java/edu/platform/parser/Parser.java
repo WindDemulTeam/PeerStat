@@ -233,22 +233,28 @@ public class Parser {
         JsonNode graphInfo = sendRequest(RequestBody.getGraphInfo(user));
 
         if (!graphInfo.isEmpty()) {
-            JsonNode projectsBlockListJson = graphInfo.get(HOLY_GRAPH).get(STUDENT_STATE_GRAPH).get(NODES);
+            JsonNode projectsBlockListJson = graphInfo.get(HOLY_GRAPH).get(STUDENT_STATE_TEMPLATE).get(NODES);
 
             for (JsonNode projectBlock :
                     projectsBlockListJson) {
+
+                JsonNode projectNode = sendRequest(RequestBody.ProjectMapGetStudentStateGraphNode(user, projectBlock));
+
                 JsonNode projectsListJson = projectBlock.get(ITEMS);
 
                 for (JsonNode projectJson : projectsListJson) {
-                    JsonNode courseJson = null;
                     JsonNode course = projectJson.get(COURSE);
                     if (!course.isNull()) {
-                        ProjectType projectType = ProjectType.valueOf(course.get(COURSE_TYPE).asText());
-                        if (projectType.equals(ProjectType.INTENSIVE)) {
-                            courseJson = sendRequest(RequestBody.getLocalCourseGoals(course.get(COURSE_ID).asInt()));
+                        JsonNode courseNodes = projectNode.get(HOLY_GRAPH).get(STUDENT_STATE_GRAPH_NODE).get(ITEMS);
+                        for (JsonNode courseNode : courseNodes) {
+                            ProjectType projectType = ProjectType.valueOf(course.get(COURSE_TYPE).asText());
+                            if (projectType.equals(ProjectType.INTENSIVE)) {
+                                JsonNode courseJson = sendRequest(RequestBody.getLocalCourseGoals(courseNode.get(COURSE).get(COURSE_ID).asInt()));
+                                projectService.save(projectJson, courseJson);
+                            }
                         }
                     }
-                    projectService.save(projectJson, courseJson);
+                    projectService.save(projectJson, null);
                 }
             }
         }

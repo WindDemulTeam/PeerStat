@@ -1,5 +1,6 @@
 package edu.platform.parser;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import edu.platform.models.User;
 
 import java.time.LocalDate;
@@ -143,13 +144,26 @@ public class RequestBody {
     public static String getGraphInfo(User user) {
         return String.format("""
                 {
-                    "operationName": "ProjectMapGetStudentGraphState",
+                    "operationName": "ProjectMapGetStudentGraphTemplate",
                     "variables": {
                         "studentId": "%s"
                     },
-                    "query": "query ProjectMapGetStudentGraphState($studentId: UUID, $stageGroupId: Int) {\\n  holyGraph {\\n    getStudentStateGraph(studentId: $studentId, stageGroupId: $stageGroupId) {\\n      ...GraphJson\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n\\nfragment GraphJson on HolyGraphJSON {\\n  nodes {\\n    id\\n    label\\n    items {\\n      id\\n      code\\n      handles\\n      entityType\\n      entityId\\n      parentNodeCodes\\n      skills {\\n        id\\n        name\\n        color\\n        textColor\\n        __typename\\n      }\\n      goal {\\n        projectId\\n        projectName\\n        projectDescription\\n        projectPoints\\n        goalExecutionType\\n        duration\\n        projectDate\\n        projectState\\n        isMandatory\\n        projectDate\\n        __typename\\n      }\\n      course {\\n        projectId\\n        projectName\\n        projectDescription\\n        projectPoints\\n        projectPoints\\n        courseType\\n        duration\\n        projectDate\\n        projectState\\n        projectDate\\n        localCourseId\\n        __typename\\n      }\\n      parentNodeCodes\\n      __typename\\n    }\\n    position {\\n      x\\n      y\\n      __typename\\n    }\\n    __typename\\n  }\\n  edges {\\n    id\\n    source\\n    target\\n    sourceHandle\\n    targetHandle\\n    __typename\\n  }\\n  __typename\\n}\\n"
+                    "query": "query ProjectMapGetStudentGraphTemplate($studentId: UUID, $stageGroupId: Int) {\\n  holyGraph {\\n    getStudentGraphTemplate(studentId: $studentId, stageGroupId: $stageGroupId) {\\n      edges {\\n        id\\n        source\\n        target\\n        sourceHandle\\n        targetHandle\\n        data {\\n          sourceGap\\n          targetGap\\n          points {\\n            x\\n            y\\n            __typename\\n          }\\n          __typename\\n        }\\n        __typename\\n      }\\n      nodes {\\n        id\\n        label\\n        handles\\n        position {\\n          x\\n          y\\n          __typename\\n        }\\n        items {\\n          id\\n          code\\n          handles\\n          entityType\\n          entityId\\n          parentNodeCodes\\n          childrenNodeCodes\\n          skills {\\n            id\\n            name\\n            color\\n            textColor\\n            __typename\\n          }\\n          goal {\\n            projectId\\n            projectName\\n            projectDescription\\n            projectPoints\\n            goalExecutionType\\n            isMandatory\\n            __typename\\n          }\\n          course {\\n            projectId\\n            projectName\\n            projectDescription\\n            projectPoints\\n            courseType\\n            isMandatory\\n            __typename\\n          }\\n          __typename\\n        }\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n"
                 }
                 """, user.getStudentId());
+    }
+
+    public static String ProjectMapGetStudentStateGraphNode(User user, JsonNode node) {
+        return String.format("""
+                {
+                    "operationName": "ProjectMapGetStudentStateGraphNode",
+                    "variables": {
+                        "graphNode": %s,
+                        "studentId": "%s"
+                    },
+                    "query": "query ProjectMapGetStudentStateGraphNode($graphNode: JsonNode!, $studentId: UUID, $stageGroupId: Int) {\\n  holyGraph {\\n    getStudentStateGraphNode(\\n      graphNode: $graphNode\\n      studentId: $studentId\\n      stageGroupId: $stageGroupId\\n    ) {\\n      id\\n      items {\\n        id\\n        goal {\\n          projectState\\n          duration\\n          projectDate\\n          __typename\\n        }\\n        course {\\n          projectState\\n          localCourseId\\n          duration\\n          projectDate\\n          __typename\\n        }\\n        __typename\\n      }\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n"
+                }
+                """, node, user.getStudentId());
     }
 
     public static String getProjectInfo(Long goalId) {

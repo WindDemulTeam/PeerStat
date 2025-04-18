@@ -35,7 +35,12 @@ public class UserMapper {
         CAMPUS_LOCALE.put("21 Veliky Novgorod", "Великий Новгород");
         CAMPUS_LOCALE.put("21 Samarkand", "Самарканд");
         CAMPUS_LOCALE.put("21 Yaroslavl", "Ярославль");
-        CAMPUS_LOCALE.put("21 Magas", "Магас");
+        CAMPUS_LOCALE.put("21 Sakhalin", "Сахалин");
+        CAMPUS_LOCALE.put("21 Tashkent", "Ташкент");
+        CAMPUS_LOCALE.put("21 Magadan", "Магадан");
+        CAMPUS_LOCALE.put("21 Belgorod", "Белгород");
+        CAMPUS_LOCALE.put("21 Anadyr", "Анадырь");
+        CAMPUS_LOCALE.put("21 Chelyabinsk", "Челябинск");
         CAMPUS_LOCALE.put("Акселератор студента 0 этап", "Акселератор студента 0 этап");
     }
 

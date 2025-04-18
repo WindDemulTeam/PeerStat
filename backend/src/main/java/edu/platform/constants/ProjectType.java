@@ -6,5 +6,6 @@ public enum ProjectType {
     EXAM,
     INTERNSHIP,
     MODULE_PROJECT,
-    INTENSIVE
+    INTENSIVE,
+    EXAM_TEST
 }
