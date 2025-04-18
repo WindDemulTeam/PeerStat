@@ -136,9 +136,23 @@ public class RequestBody {
                         "studentId": "%s",
                         "stageGroupId": "%s"
                     },
-                    "query": "query publicProfileGetProjects($studentId: UUID!, $stageGroupId: ID!) {\\n  school21 {\\n    getStudentProjectsForPublicProfileByStageGroup(\\n      studentId: $studentId\\n      stageGroupId: $stageGroupId\\n    ) {\\n      groupName\\n      name\\n      experience\\n      finalPercentage\\n      goalId\\n      goalStatus\\n      amountAnswers\\n      amountReviewedAnswers\\n      executionType\\n      localCourseId\\n      courseType\\n      displayedCourseStatus\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n"
+                    "query": "query publicProfileGetProjects($studentId: UUID!, $stageGroupId: ID!) {\\n  school21 {\\n    getStudentProjectsForPublicProfileV2(\\n      studentId: $studentId\\n      stageGroupId: $stageGroupId\\n    ) {\\n      groupName\\n      name\\n      experience\\n      finalPercentage\\n      goalId\\n      goalStatus\\n      amountAnswers\\n      amountReviewedAnswers\\n      executionType\\n      localCourseId\\n      courseType\\n      displayedCourseStatus\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n"
                 }
+
                 """, user.getStudentId(), user.getWaveId());
+    }
+
+    public static String getUserProjectsStatuses(User user, JsonNode node) {
+        return String.format("""
+                {
+                    "operationName": "publicProfileGetProjectsStatuses",
+                    "variables": {
+                        "studentId": "%s",
+                        "projects": %s
+                    },
+                    "query": "query publicProfileGetProjectsStatuses($studentId: UUID!, $projects: [StudentItemEntityInput!]!) {\\n  school21 {\\n    getStudentProjectStatusesForPublicProfileV2(\\n      studentId: $studentId\\n      projects: $projects\\n    ) {\\n      groupName\\n      name\\n      experience\\n      finalPercentage\\n      goalId\\n      goalStatus\\n      amountAnswers\\n      amountReviewedAnswers\\n      executionType\\n      localCourseId\\n      courseType\\n      displayedCourseStatus\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n"
+                }
+                """, user.getStudentId(), node);
     }
 
     public static String getGraphInfo(User user) {

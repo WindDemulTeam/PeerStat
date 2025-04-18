@@ -44,7 +44,8 @@ public interface GraphQLConstants {
     String HISTORY = "history";
     String TYPENAME = "__typename";
 
-    String STUDENT_PROJECT = "getStudentProjectsForPublicProfileByStageGroup";
+    String STUDENT_PROJECT = "getStudentProjectsForPublicProfileV2";
+    String STUDENT_PROJECT_STATUS = "getStudentProjectStatusesForPublicProfileV2";
     String GOAL_ID = "goalId";
     String GOAL_STATUS = "goalStatus";
     String FINAL_PERCENTAGE = "finalPercentage";
@@ -81,6 +82,7 @@ public interface GraphQLConstants {
     String LOCAL_COURSE_DURATION = "projectHours";
     String LOCAL_COURSE_TYPE = "executionType";
     String LOCAL_COURSE_SCORE = "finalPoint";
+    String LOCAL_COURSE_ID = "localCourseId";
     String PROJECT_NAME = "projectName";
     String PROJECT_DESCRIPTION = "projectDescription";
     String PROJECT_POINTS = "projectPoints";

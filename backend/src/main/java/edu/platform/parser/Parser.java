@@ -1,6 +1,9 @@
 package edu.platform.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import edu.platform.constants.EntityType;
 import edu.platform.constants.ProjectState;
 import edu.platform.constants.ProjectType;
@@ -201,13 +204,31 @@ public class Parser {
         });
     }
 
+    private void setProjectNode(JsonNode userProjectJson, ObjectNode project, String id) {
+        JsonNode param = userProjectJson.get(id);
+        if (!param.isNull()) {
+            project.put(id, param.asText());
+        } else {
+            project.putNull(id);
+        }
+    }
+
     private void setUserProjects(User user) throws IOException {
         JsonNode userProjectInfo = sendRequest(RequestBody.getUserProjects(user));
         if (!userProjectInfo.isEmpty()) {
+            ObjectMapper mapper = new ObjectMapper();
+            ArrayNode projects = mapper.createArrayNode();
             JsonNode userProjectListJson = userProjectInfo.get(SCHOOL_21).get(STUDENT_PROJECT);
             for (JsonNode userProjectJson : userProjectListJson) {
-                ProjectState projectState = ProjectState.valueOf(userProjectJson.get(GOAL_STATUS).asText());
-                if (!ProjectState.UNAVAILABLE.equals(projectState)) {
+                ObjectNode project = projects.addObject();
+                setProjectNode(userProjectJson, project, GOAL_ID);
+                setProjectNode(userProjectJson, project, LOCAL_COURSE_ID);
+            }
+            JsonNode userProjectStatuses = sendRequest(RequestBody.getUserProjectsStatuses(user, projects));
+            userProjectListJson = userProjectStatuses.get(SCHOOL_21).get(STUDENT_PROJECT_STATUS);
+
+            for (JsonNode userProjectJson : userProjectListJson) {
+                if (!ProjectState.UNAVAILABLE.equals(userProjectJson.get(GOAL_STATUS).asText())) {
                     Long projectId = Long.parseLong(userProjectJson.get(GOAL_ID).asText());
                     Optional<Project> projectOpt = projectService.findById(projectId);
                     if (projectOpt.isPresent()) {
@@ -253,8 +274,9 @@ public class Parser {
                                 projectService.save(projectJson, courseJson);
                             }
                         }
+                    } else {
+                        projectService.save(projectJson, null);
                     }
-                    projectService.save(projectJson, null);
                 }
             }
         }
