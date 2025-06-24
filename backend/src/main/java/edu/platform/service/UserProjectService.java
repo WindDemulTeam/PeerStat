@@ -58,11 +58,14 @@ public class UserProjectService {
 
     public void createAndSaveGoal(User user, Project project, JsonNode userProjectJson) {
         UserProject userProject = create(user, project);
-        ProjectState state = ProjectState.valueOf(userProjectJson.get(GOAL_STATUS).asText());
-        int score = userProjectJson.get(FINAL_PERCENTAGE).asInt();
-        userProject.setProjectState(state);
-        userProject.setScore(score);
-        userProjectRepository.save(userProject);
+        JsonNode projectState = userProjectJson.get(GOAL_STATUS);
+        if (!projectState.isNull()) {
+            ProjectState state = ProjectState.valueOf(projectState.asText());
+            int score = userProjectJson.get(FINAL_PERCENTAGE).asInt();
+            userProject.setProjectState(state);
+            userProject.setScore(score);
+            userProjectRepository.save(userProject);
+        }
     }
 
     public void createAndSaveCourse(User user, Project project, ProjectState state, int score) {

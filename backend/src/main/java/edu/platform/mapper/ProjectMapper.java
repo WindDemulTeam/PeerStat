@@ -28,12 +28,10 @@ public class ProjectMapper {
         ProjectView projectView = new ProjectView();
         projectView.setProjectId(project.getId());
         projectView.setCourseId(project.getCourseId());
-        projectView.setCode(project.getCode());
         projectView.setProjectName(project.getProjectName());
         projectView.setProjectDescription(project.getProjectDescription());
         projectView.setPoints(project.getPoints());
         projectView.setDuration(project.getDuration());
-        projectView.setMandatory(MANDATORY_LOCALE.get(project.getIsMandatory()));
         projectView.setType(TYPE_LOCALE.get(project.getProjectType()));
         return projectView;
     }

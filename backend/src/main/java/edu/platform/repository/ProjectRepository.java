@@ -6,11 +6,12 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProjectRepository extends CrudRepository<Project, Long> {
 
     List<Project> findAll();
-    List<Project> findByCourseIdAndEntityTypeOrEntityType(int courseId, EntityType entityType1, EntityType entityTyp2);
-    List<Project> findByCourseIdAndEntityType(int courseId, EntityType entityType);
+    List<Project> findByCourseIdAndEntityTypeOrEntityType(Long courseId, EntityType entityType1, EntityType entityTyp2);
+    List<Project> findByCourseIdAndEntityType(Long courseId, EntityType entityType);
 }

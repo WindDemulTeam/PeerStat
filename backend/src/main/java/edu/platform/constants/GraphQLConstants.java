@@ -65,6 +65,7 @@ public interface GraphQLConstants {
     String HOLY_GRAPH = "holyGraph";
     String ITEMS = "items";
     String CODE = "code";
+    String PROJECT_ID = "id";
     String ENTITY_ID = "entityId";
     String ENTITY_TYPE = "entityType";
 
@@ -75,6 +76,8 @@ public interface GraphQLConstants {
     String COURSE = "course";
     String COURSE_TYPE = "courseType";
     String COURSE_ID = "localCourseId";
+    String GLOBAL_COURSE_ID = "globalCourseId";
+    String GLOBAL_COURSE_NAME = "courseName";
     String COURSE_GOAL = "getLocalCourseGoals";
     String LOCAL_COURSE_GOAL = "localCourseGoals";
     String LOCAL_COURSE_NAME = "goalName";
@@ -83,8 +86,10 @@ public interface GraphQLConstants {
     String LOCAL_COURSE_TYPE = "executionType";
     String LOCAL_COURSE_SCORE = "finalPoint";
     String LOCAL_COURSE_ID = "localCourseId";
+    String PROJECT_TITLE = "moduleTitle";
     String PROJECT_NAME = "projectName";
     String PROJECT_DESCRIPTION = "projectDescription";
+    String PROJECT_IDEA = "idea";
     String PROJECT_POINTS = "projectPoints";
     String DURATION = "duration";
     String PROJECT_STATE = "projectState";
@@ -92,4 +97,7 @@ public interface GraphQLConstants {
     String MODULE_BY_ID = "getModuleById";
     String MODULE_GOAL_STATUS = "displayedGoalStatus";
     String USER_SCHOOL_ROLES = "getCurrentUserSchoolRoles";
+    String STUDY_MODULE = "studyModule";
+    String GOAL_POINT = "goalPoint";
+
 }

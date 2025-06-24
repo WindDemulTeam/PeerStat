@@ -7,7 +7,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -38,20 +37,12 @@ public class Runner {
     @EventListener(ApplicationReadyEvent.class)
     public void runAtStart() {
         System.out.println("[Runner] run");
+        loginService.login();
+        scheduleTokenUpdate();
+        parser.initUsers();
 
-        try {
-            loginService.login();
-            parser.parseGraphInfo();
-
-            scheduleTokenUpdate();
-            parser.initUsers();
-
-            scheduleDataUpdate();
-            scheduleLocationsUpdate();
-
-        } catch (IOException e) {
-            System.out.println("[Runner] ERROR " + e.getMessage());
-        }
+        scheduleDataUpdate();
+        scheduleLocationsUpdate();
     }
 
     private void scheduleDataUpdate() {

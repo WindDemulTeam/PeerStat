@@ -10,6 +10,7 @@ import edu.platform.mapper.ProjectMapper;
 import edu.platform.modelView.ProjectView;
 import edu.platform.models.Project;
 import edu.platform.repository.ProjectRepository;
+import jakarta.persistence.EnumType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +40,7 @@ public class ProjectService {
         return projectRepository.findById(id);
     }
 
-    public List<Project> findCourseById(int courseId) {
+    public List<Project> findCourseById(Long courseId) {
         return projectRepository.findByCourseIdAndEntityType(courseId, EntityType.GOAL);
     }
 
@@ -49,86 +50,80 @@ public class ProjectService {
     }
 
     public List<ProjectView> getProjectListForWeb() {
-        return projectRepository.findByCourseIdAndEntityTypeOrEntityType(0, EntityType.GOAL, EntityType.COURSE).stream()
+        return projectRepository.findByCourseIdAndEntityTypeOrEntityType(0L, EntityType.GOAL, EntityType.COURSE).stream()
                 .map(projectMapper::getProjectView)
                 .toList();
     }
-    public List<ProjectView> getCourseListForWeb(int id) {
+
+    public List<ProjectView> getCourseListForWeb(Long id) {
         return projectRepository.findByCourseIdAndEntityType(id, EntityType.GOAL).stream()
                 .map(projectMapper::getProjectView)
                 .toList();
     }
 
-    public void save(JsonNode projectJson, JsonNode courseJson) {
+    public void saveProject(JsonNode projectJson) {
         try {
             Project project = createProjectFromJson(projectJson);
-            if (courseJson != null && !courseJson.isNull()) {
-                int courseId = courseJson.get(COURSE).get(COURSE_GOAL).get(COURSE_ID).asInt();
-                JsonNode courses = courseJson.get(COURSE).get(COURSE_GOAL).get(LOCAL_COURSE_GOAL);
-                project.setCourseId(courseId);
-                for (JsonNode course :
-                        courses) {
-                    Project projectCourse = createCourseFromJson(course, courseId);
-                    if (!projectCourse.getProjectType().equals(ProjectType.EXAM_TEST)) {
-                        System.out.println(projectCourse.getProjectName());
-                        projectRepository.save(projectCourse);
-                    }
-                }
-            }
-            System.out.println(project.getProjectName());
             projectRepository.save(project);
+            System.out.println("[parseProject] " + project.getProjectName());
         } catch (JsonProcessingException e) {
             System.out.println("[Project Service] can not create project " + projectJson);
             System.out.println("[Project Service]  " + e.getMessage());
-
         }
     }
 
     public Project createProjectFromJson(JsonNode projectJson) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, Object> projectMap = objectMapper.convertValue(projectJson, new TypeReference<Map<String, Object>>() {
+        Map<String, Object> projectMap = objectMapper.convertValue(projectJson.get(MODULE_BY_ID), new TypeReference<Map<String, Object>>() {
         });
 
         Project project = new Project();
-        project.setId(Long.parseLong(projectMap.get(ENTITY_ID).toString()));
-        project.setCode(projectMap.get(CODE).toString());
 
-        EntityType entityType = EntityType.valueOf(projectMap.get(ENTITY_TYPE).toString());
-        project.setEntityType(entityType);
-
-        Map<String, String> projectInfoMap = objectMapper.convertValue(projectJson.get(entityType.name().toLowerCase()), new TypeReference<Map<String, String>>() {
+        project.setId(Long.parseLong(projectMap.get(PROJECT_ID).toString()));
+        project.setProjectName(projectMap.get(PROJECT_TITLE).toString());
+        project.setProjectType(ProjectType.valueOf(projectMap.get(GOAL_TYPE).toString()));
+        project.setEntityType(EntityType.GOAL);
+        Map<String, Object> projectInfoMap = objectMapper.convertValue(projectJson.get(MODULE_BY_ID).get(STUDY_MODULE), new TypeReference<Map<String, Object>>() {
         });
 
-        project.setProjectName(projectInfoMap.get(PROJECT_NAME));
-        project.setProjectDescription(projectInfoMap.get(PROJECT_DESCRIPTION));
-        project.setPoints(Integer.parseInt(projectInfoMap.get(PROJECT_POINTS)));
-
-        if (entityType.equals(EntityType.GOAL)) {
-            project.setProjectType(ProjectType.valueOf(projectInfoMap.get(GOAL_TYPE)));
-            project.setIsMandatory(Boolean.valueOf(projectInfoMap.get(IS_MANDATORY)));
-        } else if (entityType.equals(EntityType.COURSE)) {
-            ProjectType projectType = ProjectType.valueOf(projectInfoMap.get(COURSE_TYPE));
-            project.setProjectType(projectType);
-            project.setIsMandatory(Boolean.valueOf(projectInfoMap.get(IS_MANDATORY)));
-        }
+        project.setProjectDescription(projectInfoMap.get(PROJECT_IDEA).toString());
+        project.setPoints(Integer.parseInt(projectInfoMap.get(GOAL_POINT).toString()));
+        project.setDuration(Integer.parseInt(projectInfoMap.get(DURATION).toString()));
+        project.setCourseId(0L);
 
         return project;
     }
 
-    public Project createCourseFromJson(JsonNode courseJson, int courseId) throws JsonProcessingException {
-
+    public void saveCourse(JsonNode courseJson, Long courseId) {
         Project project = new Project();
 
-        project.setId(courseJson.get(GOAL_ID).asLong());
+        JsonNode globalCourse = courseJson.get(COURSE_GOAL);
+
+        project.setId(globalCourse.get(GLOBAL_COURSE_ID).asLong());
         project.setCourseId(courseId);
-        project.setEntityType(EntityType.GOAL);
-        project.setProjectName(courseJson.get(LOCAL_COURSE_NAME).asText());
-        project.setProjectDescription(courseJson.get(LOCAL_COURSE_DESCRIPTION).asText());
+        project.setEntityType(EntityType.COURSE);
+        project.setProjectName(globalCourse.get(GLOBAL_COURSE_NAME).asText());
 
-        ProjectType projectType = ProjectType.valueOf(courseJson.get(LOCAL_COURSE_TYPE).asText());
+        ProjectType projectType = ProjectType.valueOf(globalCourse.get(COURSE_TYPE).asText());
         project.setProjectType(projectType);
-        project.setIsMandatory(true);
+        projectRepository.save(project);
+        System.out.println("[parseCourse] " + project.getProjectName());
 
-        return project;
+        JsonNode localCourses = globalCourse.get(LOCAL_COURSE_GOAL);
+        for (JsonNode course : localCourses) {
+            project = new Project();
+            project.setId(course.get(GOAL_ID).asLong());
+            project.setCourseId(courseId);
+            project.setProjectName(course.get(LOCAL_COURSE_NAME).asText());
+            project.setProjectDescription(course.get(LOCAL_COURSE_DESCRIPTION).asText());
+            project.setDuration(course.get(LOCAL_COURSE_DURATION).asInt());
+            project.setPoints(course.get(LOCAL_COURSE_SCORE).asInt());
+            project.setEntityType(EntityType.GOAL);
+
+            projectType = ProjectType.valueOf(course.get(LOCAL_COURSE_TYPE).asText());
+            project.setProjectType(projectType);
+            projectRepository.save(project);
+            System.out.println("[parseCourse] " + project.getProjectName());
+        }
     }
 }

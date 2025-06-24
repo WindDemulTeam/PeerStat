@@ -15,16 +15,10 @@ public class Project {
 
     @Id
     private Long id;
-    private String code;
-    private Boolean isMandatory;
-    private int courseId;
+    private Long courseId;
     private String projectName;
     private int points;
     private int duration;
-
-    private String subjectLink;
-    private String accessAfter;
-    private String restartBefore;
 
     @Column(columnDefinition = "TEXT")
     private String projectDescription;

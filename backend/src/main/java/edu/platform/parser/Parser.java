@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import edu.platform.constants.EntityType;
 import edu.platform.constants.ProjectState;
-import edu.platform.constants.ProjectType;
 import edu.platform.models.Project;
 import edu.platform.models.User;
 import edu.platform.service.LoginService;
@@ -97,7 +95,6 @@ public class Parser {
                     userService.save(user);
 
                     setUserProjects(user);
-                    setUserProjectsFromGraph(user);
 
                     System.out.println("[parser updateUsers] user " + user.getLogin() + " ok");
                 } catch (Exception e) {
@@ -122,7 +119,6 @@ public class Parser {
                 userService.save(user);
 
                 setUserProjects(user);
-                setUserProjectsFromGraph(user);
 
                 System.out.println("[parseUser] user done " + user.getLogin());
             } else {
@@ -154,42 +150,7 @@ public class Parser {
         userService.setXpHistory(user, sendRequest(RequestBody.getXpHistory(user)));
     }
 
-    private void setUserProjectsFromGraph(User user) throws IOException {
-
-        JsonNode graphInfo = sendRequest(RequestBody.getGraphInfo(user));
-        if (!graphInfo.isEmpty()) {
-            JsonNode projectsBlockListJson = graphInfo.get(HOLY_GRAPH).get(STUDENT_STATE_GRAPH).get(NODES);
-            for (JsonNode projectBlock :
-                    projectsBlockListJson) {
-                JsonNode projectsListJson = projectBlock.get(ITEMS);
-                for (JsonNode projectJson : projectsListJson) {
-                    EntityType entityType = EntityType.valueOf(projectJson.get(ENTITY_TYPE).asText());
-                    if (entityType.equals(EntityType.COURSE)) {
-                        String stateStr = projectJson.get(COURSE).get(PROJECT_STATE).asText();
-                        ProjectState projectState = stateStr == null ? null : ProjectState.valueOf(stateStr);
-                        if (projectState != null && !ProjectState.LOCKED.equals(projectState) && !ProjectState.UNAVAILABLE.equals(projectState)) {
-                            Long projectId = projectJson.get(ENTITY_ID).asLong();
-                            Optional<Project> projectOpt = projectService.findById(projectId);
-                            if (projectOpt.isPresent()) {
-                                ProjectType projectType = ProjectType.valueOf(projectJson.get(COURSE).get(COURSE_TYPE).asText());
-                                if (projectType.equals(ProjectType.INTENSIVE)) {
-                                    int courseId = projectOpt.get().getCourseId();
-                                    List<Project> courseList = projectService.findCourseById(courseId);
-                                    setUserCourseFromGraph(user, courseList);
-                                }
-                                ProjectState state = ProjectState.valueOf(projectJson.get(COURSE).get(PROJECT_STATE).asText());
-                                userProjectService.createAndSaveCourse(user, projectOpt.get(), state, 0);
-                            } else {
-                                System.out.println("[PARSER] ERROR Project not found, id" + projectId);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private void setUserCourseFromGraph(User user, List<Project> courseList) {
+    private void setUserCourses(User user, List<Project> courseList) {
         courseUpdatePool.submit(() -> {
             courseList.parallelStream().forEach((course) -> {
                 try {
@@ -229,58 +190,58 @@ public class Parser {
 
             for (JsonNode userProjectJson : userProjectListJson) {
                 if (!ProjectState.UNAVAILABLE.equals(userProjectJson.get(GOAL_STATUS).asText())) {
-                    Long projectId = Long.parseLong(userProjectJson.get(GOAL_ID).asText());
-                    Optional<Project> projectOpt = projectService.findById(projectId);
-                    if (projectOpt.isPresent()) {
-                        userProjectService.createAndSaveGoal(user, projectOpt.get(), userProjectJson);
+                    JsonNode courseId = userProjectJson.get(COURSE_ID);
+                    if (!courseId.isNull()) {
+                        Long id = courseId.asLong();
+                        List<Project> courses = projectService.findCourseById(id);
+                        if (courses.isEmpty()) {
+                            if (!parseCourse(id)) {
+                                continue;
+                            }
+                            courses = projectService.findCourseById(id);
+                        }
+                        for (Project course : courses) {
+                            userProjectService.createAndSaveGoal(user, course, userProjectJson);
+                        }
+                        setUserCourses(user, courses);
                     } else {
-                        System.out.println("[PARSER] ERROR Project not found, id" + projectId);
+                        Long projectId = Long.parseLong(userProjectJson.get(GOAL_ID).asText());
+                        Optional<Project> projectOpt = projectService.findById(projectId);
+                        if (!projectOpt.isPresent()) {
+                            if (!parseProject(projectId)) {
+                                continue;
+                            }
+                            projectOpt = projectService.findById(projectId);
+                        }
+                        userProjectService.createAndSaveGoal(user, projectOpt.get(), userProjectJson);
                     }
                 }
             }
         }
     }
 
-    public void parseGraphInfo() throws IOException {
-        System.out.println("[parser parseGraphInfo] begin");
-
-        String userLogin = loginService.getLogin();
-        User user = userService.findUserByLogin(userLogin);
-        if (user == null) {
-            user = new User(userLogin);
-            setCredentials(user);
-        }
-
-        JsonNode graphInfo = sendRequest(RequestBody.getGraphInfo(user));
-
-        if (!graphInfo.isEmpty()) {
-            JsonNode projectsBlockListJson = graphInfo.get(HOLY_GRAPH).get(STUDENT_STATE_TEMPLATE).get(NODES);
-
-            for (JsonNode projectBlock :
-                    projectsBlockListJson) {
-
-                JsonNode projectNode = sendRequest(RequestBody.ProjectMapGetStudentStateGraphNode(user, projectBlock));
-
-                JsonNode projectsListJson = projectBlock.get(ITEMS);
-
-                for (JsonNode projectJson : projectsListJson) {
-                    JsonNode course = projectJson.get(COURSE);
-                    if (!course.isNull()) {
-                        JsonNode courseNodes = projectNode.get(HOLY_GRAPH).get(STUDENT_STATE_GRAPH_NODE).get(ITEMS);
-                        for (JsonNode courseNode : courseNodes) {
-                            ProjectType projectType = ProjectType.valueOf(course.get(COURSE_TYPE).asText());
-                            if (projectType.equals(ProjectType.INTENSIVE)) {
-                                JsonNode courseJson = sendRequest(RequestBody.getLocalCourseGoals(courseNode.get(COURSE).get(COURSE_ID).asInt()));
-                                projectService.save(projectJson, courseJson);
-                            }
-                        }
-                    } else {
-                        projectService.save(projectJson, null);
-                    }
-                }
+    public boolean parseProject(Long projectId) throws IOException {
+        JsonNode projectInfo = sendRequest(RequestBody.getProjectInfo(projectId));
+        if (!projectInfo.isEmpty()) {
+            JsonNode projectJson = projectInfo.get(STUDENT);
+            if (!projectJson.isNull()) {
+                projectService.saveProject(projectJson);
+                return true;
             }
         }
-        System.out.println("[parser parseGraphInfo] done");
+        return false;
+    }
+
+    public boolean parseCourse(Long courseId) throws IOException {
+        JsonNode courseInfo = sendRequest(RequestBody.getLocalCourseGoals(courseId));
+        if (!courseInfo.isEmpty()) {
+            JsonNode courseJson = courseInfo.get(COURSE);
+            if (!courseJson.isNull()) {
+                projectService.saveCourse(courseJson, courseId);
+                return true;
+            }
+        }
+        return false;
     }
 
     public void updateUserLocations() {

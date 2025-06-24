@@ -1,170 +1,209 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import Api from "../../Api/Api";
 import ReactTable from "./ReactTable";
 import { DropdownFilter, TextSearchFilter } from "../../utils/filters";
 import Loader from "../loader/Loader";
-import useFetching from "../hooks/useFetching";
+import classes from "./Project.module.css";
 
 const Project = () => {
   const [projectsList, setProjectsList] = useState([]);
   const [courseList, setCourseList] = useState([]);
   const [userList, setUserList] = useState([]);
+  const [searchInput, setSearchInput] = useState("");
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
+  const [isCourseDropdownOpen, setIsCourseDropdownOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState({
+    projects: true,
+    courses: false,
+    users: false,
+  });
 
-  const [projectId, setProjectId] = useState(0);
-  const [courseId, setCourseId] = useState(0);
+  const projectDropdownRef = useRef(null);
+  const courseDropdownRef = useRef(null);
 
-  const { loading: isProjectListLoading } = useFetching(async () => {
-    const response = await Api.getProjectList();
-    setProjectsList(response.data);
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setIsLoading((prev) => ({ ...prev, projects: true }));
+        const response = await Api.getProjectList();
+        setProjectsList(response.data);
+      } finally {
+        setIsLoading((prev) => ({ ...prev, projects: false }));
+      }
+    };
+
+    fetchProjects();
   }, []);
 
-  const { loading: isCourseLoading } = useFetching(async () => {
-    if (courseId > 0) {
-      const response = await Api.getCourseList(courseId);
-      setCourseList(response.data);
-    }
-  }, [courseId]);
+  useEffect(() => {
+    const fetchCourses = async () => {
+      if (selectedProject?.courseId) {
+        try {
+          setIsLoading((prev) => ({ ...prev, courses: true }));
+          const response = await Api.getCourseList(selectedProject.courseId);
+          setCourseList(response.data);
+        } finally {
+          setIsLoading((prev) => ({ ...prev, courses: false }));
+        }
+      }
+    };
 
-  const { loading: isUsertListLoading } = useFetching(async () => {
-    if (courseId === 0) {
-      const response = await Api.getProjectUsers(projectId);
-      setUserList(response.data);
-    } else {
-      setUserList([]);
-    }
-  }, [projectId, courseId]);
+    fetchCourses();
+  }, [selectedProject]);
 
-  const currentProject = useMemo(() => {
-    if (courseList.length > 0 && projectId > 0) {
-      return courseList.find((item) => item.projectId === projectId);
-    }
-    if (projectsList.length > 0 && projectId > 0) {
-      return projectsList.find((item) => item.projectId === projectId);
-    }
-    return undefined;
-  }, [projectId, projectsList, courseList]);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setIsLoading((prev) => ({ ...prev, users: true }));
+
+        if (selectedCourse) {
+          const response = await Api.getProjectUsers(selectedCourse.projectId);
+          setUserList(response.data);
+        } else if (selectedProject && !selectedProject.courseId) {
+          const response = await Api.getProjectUsers(selectedProject.projectId);
+          setUserList(response.data);
+        } else {
+          setUserList([]);
+        }
+      } finally {
+        setIsLoading((prev) => ({ ...prev, users: false }));
+      }
+    };
+
+    fetchUsers();
+  }, [selectedProject, selectedCourse]);
+
+  const filteredProjects = useMemo(() => {
+    if (!searchInput) return projectsList;
+    return projectsList.filter((project) =>
+      project.projectName.toLowerCase().includes(searchInput.toLowerCase())
+    );
+  }, [projectsList, searchInput]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        projectDropdownRef.current &&
+        !projectDropdownRef.current.contains(event.target)
+      ) {
+        setIsProjectDropdownOpen(false);
+      }
+      if (
+        courseDropdownRef.current &&
+        !courseDropdownRef.current.contains(event.target)
+      ) {
+        setIsCourseDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelectProject = (project) => {
+    setSelectedProject(project);
+    setSelectedCourse(null);
+    setSearchInput("");
+    setIsProjectDropdownOpen(false);
+  };
+
+  const handleSelectCourse = (course) => {
+    setSelectedCourse(course);
+    setIsCourseDropdownOpen(false);
+  };
 
   const columns = [
-    {
-      Header: "Логин",
-      accessor: "login",
-      Filter: TextSearchFilter,
-    },
-    {
-      Header: "Кампус",
-      accessor: "campus",
-      Filter: DropdownFilter,
-    },
-    {
-      Header: "Коалиция",
-      accessor: "coalition",
-      Filter: DropdownFilter,
-    },
-    {
-      Header: "Класс",
-      accessor: "platformClass",
-      Filter: DropdownFilter,
-    },
-    {
-      Header: "Уровень",
-      accessor: "level",
-      Filter: DropdownFilter,
-    },
-    {
-      Header: "XP пира",
-      accessor: "xp",
-      disableFilters: true,
-    },
-    {
-      Header: "Результат проекта",
-      accessor: "score",
-      disableFilters: true,
-    },
-    {
-      Header: "Статус",
-      accessor: "state",
-      Filter: DropdownFilter,
-    },
-    {
-      Header: "Место",
-      accessor: "location",
-      Filter: DropdownFilter,
-    },
+    { Header: "Логин", accessor: "login", Filter: TextSearchFilter },
+    { Header: "Кампус", accessor: "campus", Filter: DropdownFilter },
+    { Header: "Коалиция", accessor: "coalition", Filter: DropdownFilter },
+    { Header: "Класс", accessor: "platformClass", Filter: DropdownFilter },
+    { Header: "Уровень", accessor: "level", Filter: DropdownFilter },
+    { Header: "XP пира", accessor: "xp", disableFilters: true },
+    { Header: "Результат проекта", accessor: "score", disableFilters: true },
+    { Header: "Статус", accessor: "state", Filter: DropdownFilter },
+    { Header: "Место", accessor: "location", Filter: DropdownFilter },
   ];
 
+  const displayProject = selectedCourse || selectedProject;
+
   return (
-    <div>
+    <>
       <Loader
-        loading={
-          isProjectListLoading === true ||
-          isUsertListLoading === true ||
-          isCourseLoading === true
-        }
+        loading={isLoading.projects || isLoading.courses || isLoading.users}
       />
 
-      {projectsList.length !== 0 && (
-        <select
-          defaultValue={"default"}
-          onChange={(val) => {
-            const project = projectsList[val.target.value];
-            const courseId = Number(project.courseId);
-            const projectId = Number(project.projectId);
-            setCourseList([]);
-            setProjectId(projectId);
-            setCourseId(courseId);
+      <div ref={projectDropdownRef} className={classes.projectSelector}>
+        <input
+          type="text"
+          placeholder="Поиск проекта..."
+          value={searchInput}
+          onChange={(e) => {
+            setSearchInput(e.target.value);
+            setIsProjectDropdownOpen(true);
           }}
-        >
-          <option hidden disabled value="default">
-            Выбери проект
-          </option>
-          {projectsList.map((project, index) => (
-            <option key={project.projectId} value={index}>
-              {project.projectName}
-            </option>
-          ))}
-        </select>
-      )}
+          onFocus={() => setIsProjectDropdownOpen(true)}
+          className={classes.projectSearchInput}
+        />
 
-      {courseList.length !== 0 && (
-        <select
-          defaultValue={"default"}
-          onChange={(val) => {
-            setProjectId(Number(val.target.value));
-            setCourseId(0);
-          }}
-        >
-          <option hidden disabled value="default">
-            Выбери проект
-          </option>
-          {courseList.map((course) => (
-            <option key={course.projectId} value={course.projectId}>
-              {course.projectName}
-            </option>
-          ))}
-        </select>
-      )}
+        {isProjectDropdownOpen && filteredProjects.length > 0 && (
+          <div className={classes.projectDropdown}>
+            {filteredProjects.map((project) => (
+              <div
+                key={project.projectId}
+                onClick={() => handleSelectProject(project)}
+                className={classes.projectDropdownItem}
+              >
+                {project.projectName}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-      {currentProject !== undefined && (
-        <div>
-          <h2>
-            <span>{currentProject.projectName}</span>
-          </h2>
+      {selectedProject?.courseId && courseList.length > 0 ? (
+        <div ref={courseDropdownRef} className={classes.courseSelector}>
+          <div
+            className={classes.courseSelected}
+            onClick={() => setIsCourseDropdownOpen(!isCourseDropdownOpen)}
+          >
+            {selectedCourse ? selectedCourse.projectName : "Выберите курс"}
+          </div>
+
+          {isCourseDropdownOpen && (
+            <div className={classes.courseDropdown}>
+              {courseList.map((course) => (
+                <div
+                  key={course.projectId}
+                  onClick={() => handleSelectCourse(course)}
+                  className={classes.courseDropdownItem}
+                >
+                  {course.projectName}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : null}
+
+      {((selectedProject && !selectedProject?.courseId) || selectedCourse) && displayProject && (
+        <div className={classes.projectInfo}>
+          <h2>{displayProject.projectName}</h2>
           <p>
-            <span>{currentProject.mandatory}</span>,
-            <span>{currentProject.type}</span>.
-            <span>{currentProject.points}</span> points, duration{" "}
-            <span>{currentProject.duration}</span>
+            {displayProject.type}.
+            {displayProject.points} points, duration {displayProject.duration}
           </p>
-          <p>{currentProject.projectDescription}</p>
+          <p>{displayProject.projectDescription}</p>
         </div>
       )}
 
-      {userList.length !== 0 && (
-        <div>
+      {userList.length > 0 && (
+        <div className={classes.projectUsers}>
           <ReactTable columns={columns} data={userList} />
         </div>
       )}
-    </div>
+    </>
   );
 };
 

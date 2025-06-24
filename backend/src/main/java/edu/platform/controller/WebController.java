@@ -47,7 +47,7 @@ public class WebController {
     }
 
     @GetMapping("/courseList")
-    public List<ProjectView> getCouresetList(@RequestParam(defaultValue = "0") int id) {
+    public List<ProjectView> getCourseList(@RequestParam(defaultValue = "0") Long id) {
         if (id != 0) {
             return projectService.getCourseListForWeb(id);
         }
