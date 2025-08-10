@@ -32,7 +32,7 @@ import static edu.platform.constants.GraphQLConstants.*;
 @Setter
 @Service
 public class LoginService {
-    private static final String GRAPHQL_URL = "https://edu.21-school.ru/services/graphql";
+    private static final String GRAPHQL_URL = "https://platform.21-school.ru/services/graphql";
     private final String baseUrl = "https://auth.sberclass.ru/auth/realms/EduPowerKeycloak";
     private final String cookieUrlTemplate = baseUrl + "/protocol/openid-connect/auth?client_id=school21&redirect_uri=https://edu.21-school.ru/&state=%s&response_mode=fragment&response_type=code&scope=openid&nonce=%s";
     private final String tokenUrl = baseUrl + "/protocol/openid-connect/token";
