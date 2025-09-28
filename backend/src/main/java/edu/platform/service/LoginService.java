@@ -33,8 +33,8 @@ import static edu.platform.constants.GraphQLConstants.*;
 @Service
 public class LoginService {
     private static final String GRAPHQL_URL = "https://platform.21-school.ru/services/graphql";
-    private final String baseUrl = "https://auth.sberclass.ru/auth/realms/EduPowerKeycloak";
-    private final String cookieUrlTemplate = baseUrl + "/protocol/openid-connect/auth?client_id=school21&redirect_uri=https://edu.21-school.ru/&state=%s&response_mode=fragment&response_type=code&scope=openid&nonce=%s";
+    private final String baseUrl = "https://auth.21-school.ru/auth/realms/EduPowerKeycloak";
+    private final String cookieUrlTemplate = baseUrl + "/protocol/openid-connect/auth?client_id=school21&redirect_uri=https://platform.21-school.ru/&state=%s&response_mode=fragment&response_type=code&scope=openid&nonce=%s";
     private final String tokenUrl = baseUrl + "/protocol/openid-connect/token";
     private final ObjectMapper MAPPER = new ObjectMapper();
     @Value("${school21.fullLogin}")
@@ -128,7 +128,7 @@ public class LoginService {
             param.add("client_id", "school21");
             param.add("code", oAuthCode);
             param.add("grant_type", "authorization_code");
-            param.add("redirect_uri", "https://edu.21-school.ru/");
+            param.add("redirect_uri", "https://platform.21-school.ru/");
 
             response = restTemplate.exchange(tokenUrl,
                     HttpMethod.POST,

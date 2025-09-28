@@ -43,6 +43,8 @@ public class UserMapper {
         CAMPUS_LOCALE.put("21 Chelyabinsk", "Челябинск");
         CAMPUS_LOCALE.put("Акселератор студента 0 этап", "Акселератор студента 0 этап");
         CAMPUS_LOCALE.put("21 Lipetsk", "Липецк");
+        CAMPUS_LOCALE.put("21 Magas", "Магас");
+        CAMPUS_LOCALE.put("21 Nizhny Novgorod", "Нижний Новгород");
     }
 
     public static String getLogin(String login, boolean isGraduate, boolean isActive) {

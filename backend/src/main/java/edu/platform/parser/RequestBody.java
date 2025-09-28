@@ -234,10 +234,6 @@ public class RequestBody {
 
     public static String userRoleLoaderGetRoles() {
         return String.format("""
-                {
-                  "operationName": "userRoleLoaderGetRoles",
-                  "variables": {},
-                  "query": "query userRoleLoaderGetRoles {\\n  user {\\n    getCurrentUser {\\n      functionalRoles {\\n        code\\n        __typename\\n      }\\n      id\\n      studentRoles {\\n        id\\n        school {\\n          id\\n          shortName\\n          organizationType\\n          __typename\\n        }\\n        status\\n        __typename\\n      }\\n      userSchoolPermissions {\\n        schoolId\\n        permissions\\n        __typename\\n      }\\n      systemAdminRole {\\n        id\\n        __typename\\n      }\\n      businessAdminRolesV2 {\\n        id\\n        school {\\n          id\\n          organizationType\\n          __typename\\n        }\\n        orgUnitId\\n        __typename\\n      }\\n      __typename\\n    }\\n    getCurrentUserSchoolRoles {\\n      schoolId\\n      __typename\\n    }\\n    getCurrentUserRoles {\\n      orgUnitId\\n      orgUnitShortName\\n      roleCode\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n"
-                }""");
+                {"operationName":"userRoleLoaderGetRoles","variables":{},"query":"query userRoleLoaderGetRoles {\\n  user {\\n    getCurrentUser {\\n      functionalRoles {\\n        code\\n        __typename\\n      }\\n      id\\n      studentRoles {\\n        id\\n        school {\\n          id\\n          shortName\\n          organizationType\\n          __typename\\n        }\\n        status\\n        __typename\\n      }\\n      userSchoolPermissions {\\n        schoolId\\n        permissions\\n        __typename\\n      }\\n      systemAdminRole {\\n        id\\n        __typename\\n      }\\n      businessAdminRolesV2 {\\n        id\\n        school {\\n          id\\n          organizationType\\n          __typename\\n        }\\n        orgUnitId\\n        __typename\\n      }\\n      isStudentOfChildrenCampus\\n      __typename\\n    }\\n    getCurrentUserSchoolRoles {\\n      schoolId\\n      __typename\\n    }\\n    getCurrentUserRoles {\\n      orgUnitId\\n      orgUnitShortName\\n      roleCode\\n      __typename\\n    }\\n    __typename\\n  }\\n}\\n"}""");
     }
 }
