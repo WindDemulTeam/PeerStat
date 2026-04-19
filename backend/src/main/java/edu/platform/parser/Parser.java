@@ -73,7 +73,15 @@ public class Parser {
                         .forEach(this::parseNewUser);
 
                 offset += SEARCH_LIMIT;
-                userList = getSearchResults(offset);
+                int counter = 0;
+                while(counter < 100) { // Ошибка в базе данных Школы21, решение очень плохое, но это самый простой способ пропустить ошибку
+                    userList = getSearchResults(offset);
+                    if (!userList.isEmpty()) {
+                        break;
+                    }
+                    counter++;
+                    offset++;
+                }
             }
 
             setLastUpdateTime();
@@ -208,7 +216,7 @@ public class Parser {
                         Long projectId = Long.parseLong(userProjectJson.get(GOAL_ID).asText());
                         Optional<Project> projectOpt = projectService.findById(projectId);
                         if (!projectOpt.isPresent()) {
-                            if (!parseProject(projectId)) {
+                            if (!parseProject(user, projectId)) {
                                 continue;
                             }
                             projectOpt = projectService.findById(projectId);
@@ -220,10 +228,10 @@ public class Parser {
         }
     }
 
-    public boolean parseProject(Long projectId) throws IOException {
-        JsonNode projectInfo = sendRequest(RequestBody.getProjectInfo(projectId));
+    public boolean parseProject(User user, Long projectId) throws IOException {
+        JsonNode projectInfo = sendRequest(RequestBody.getProjectInfo(user, projectId));
         if (!projectInfo.isEmpty()) {
-            JsonNode projectJson = projectInfo.get(STUDENT);
+            JsonNode projectJson = projectInfo.get(SCHOOL_21);
             if (!projectJson.isNull()) {
                 projectService.saveProject(projectJson);
                 return true;
